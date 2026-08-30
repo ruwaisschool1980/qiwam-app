@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>قِوام</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1F2A24; --ink-soft:#5B6A63;
+    --sand:#F4EFE4; --sand-deep:#EAE2CF;
+    --card:#FFFFFF; --line:#DCD5C2;
+    --teal:#0F3D3E; --teal-deep:#0A2C2D; --teal-mist:#E4EFEC;
+    --copper:#B5651D;
+    --pos:#2F7D53;   --pos-bg:#E5F1E9;
+    --minor:#B5842B; --minor-bg:#F6ECD8;
+    --moderate:#C1652D; --moderate-bg:#FBE6D8;
+    --serious:#B23A34;  --serious-bg:#F8E1DF;
+    --danger:#B23A34;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;background:var(--sand-deep);}
+  body{font-family:'IBM Plex Sans Arabic', sans-serif;color:var(--ink);display:flex;justify-content:center;padding:24px 0;}
+  h1,h2{font-family:'Almarai', sans-serif;}
+
+  .device{width:390px;min-height:844px;background:#111;border-radius:44px;padding:14px;box-shadow:0 20px 50px rgba(15,61,62,0.25);}
+  .screen{width:100%;min-height:816px;background:var(--sand);border-radius:32px;overflow:hidden;position:relative;display:flex;flex-direction:column;}
+  .notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:26px;background:#111;border-radius:0 0 16px 16px;z-index:20;}
+
+  header{padding:38px 18px 12px;background:var(--sand);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+  header h1{font-size:17px;margin:0;color:var(--teal-deep);}
+  .school-tag{font-size:10.5px;color:var(--ink-soft);}
+  .avatar{width:30px;height:30px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
+
+  .content{flex:1;overflow-y:auto;padding:6px 16px 16px;}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;}
+  .card h2{font-size:13.5px;margin:0 0 3px;color:var(--teal-deep);}
+  .card .hint{font-size:11px;color:var(--ink-soft);margin:0 0 12px;}
+
+  .field{margin-bottom:14px;}
+  .field label{display:block;font-size:11.5px;font-weight:600;margin-bottom:6px;}
+
+  input[type=text],input[type=password]{
+    width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;
+    font-family:inherit;font-size:13px;background:var(--sand);color:var(--ink);
+  }
+
+  .btn{
+    width:100%;padding:12px;border:none;border-radius:10px;
+    background:var(--teal);color:#fff;font-family:inherit;font-weight:700;font-size:13.5px;
+    display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;
+  }
+  .btn:disabled{opacity:.5;}
+  .btn.ghost{background:transparent;color:var(--ink-soft);border:1px solid var(--line);font-weight:500;}
+
+  .error-msg{color:var(--danger);font-size:11.5px;margin-top:6px;}
+  .welcome-name{font-family:'Almarai',sans-serif;font-weight:700;font-size:15px;color:var(--teal-deep);margin-bottom:14px;}
+
+  .login-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px;}
+  .login-brand{text-align:center;margin-bottom:28px;}
+  .login-brand .mark{width:56px;height:56px;border-radius:16px;background:var(--copper);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Almarai',sans-serif;font-weight:800;font-size:22px;margin:0 auto 12px;}
+  .login-brand h1{font-size:19px;margin:0;color:var(--teal-deep);}
+  .login-brand p{font-size:12px;color:var(--ink-soft);margin:4px 0 0;}
+
+  .picker-trigger{width:100%;display:flex;align-items:center;justify-content:space-between;padding:11px 13px;border:1px solid var(--line);border-radius:10px;background:var(--sand);font-family:inherit;font-size:13px;color:var(--ink-soft);cursor:pointer;}
+  .picker-trigger.filled{color:var(--ink);}
+  .picker-trigger .chosen{display:flex;align-items:center;gap:8px;}
+  .mini-avatar{width:22px;height:22px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;}
+  .picker-panel{margin-top:8px;border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden;display:none;}
+  .picker-panel.open{display:block;}
+  .picker-search{padding:9px 12px;border:none;border-bottom:1px solid var(--line);width:100%;font-family:inherit;font-size:13px;background:var(--sand);color:var(--ink);}
+  .picker-list{max-height:220px;overflow-y:auto;}
+  .picker-row{display:flex;align-items:center;gap:9px;padding:9px 12px;border-bottom:1px solid var(--line);font-size:12.5px;cursor:pointer;}
+  .picker-row:last-child{border-bottom:none;}
+  .picker-row:active{background:var(--teal-mist);}
+  .picker-row .pname{flex:1;}
+  .picker-row .pclass{font-size:10.5px;color:var(--ink-soft);}
+  .picker-empty,.picker-loading{padding:16px;text-align:center;font-size:12px;color:var(--ink-soft);}
+
+  .cat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;}
+  .cat-group{margin-bottom:12px;}
+  .cat-group:last-child{margin-bottom:0;}
+  .cat-group-title{font-size:11px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+  .cat-group-title .dot{width:7px;height:7px;border-radius:50%;}
+  .cat-group-title.pos{color:var(--pos);} .cat-group-title.pos .dot{background:var(--pos);}
+  .cat-group-title.minor{color:var(--minor);} .cat-group-title.minor .dot{background:var(--minor);}
+  .cat-group-title.moderate{color:var(--moderate);} .cat-group-title.moderate .dot{background:var(--moderate);}
+  .cat-group-title.serious{color:var(--serious);} .cat-group-title.serious .dot{background:var(--serious);}
+
+  .wa-phone{background:#0B141A;border-radius:14px;padding:12px;}
+  .wa-header{display:flex;align-items:center;gap:7px;color:#E9EDEF;font-size:11px;padding:1px 4px 10px;}
+  .wa-bubble{background:#005C4B;color:#E9EDEF;border-radius:9px 9px 2px 9px;padding:9px 11px;font-size:11.5px;line-height:1.85;white-space:pre-wrap;}
+  .wa-bubble.placeholder{background:#0B141A;color:#5B6A63;text-align:center;border-radius:9px;}
+  .wa-time{display:block;text-align:left;font-size:9.5px;color:#8FBFB2;margin-top:5px;}
+
+  .attach-row{display:flex;gap:6px;margin-top:8px;}
+  .attach-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;border:1px dashed var(--line);border-radius:10px;padding:9px 4px;font-size:10.5px;color:var(--ink-soft);background:var(--sand);cursor:pointer;}
+  .attach-btn.recording{border-color:var(--danger);color:var(--danger);border-style:solid;}
+  .attach-hint{font-size:10px;color:var(--ink-soft);margin-top:8px;}
+  .media-list{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+  .media-chip{display:flex;align-items:center;gap:8px;background:var(--sand);border:1px solid var(--line);border-radius:9px;padding:7px 10px;font-size:11.5px;}
+  .media-chip .m-icon{color:var(--ink-soft);flex-shrink:0;}
+  .media-chip .m-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .media-chip .m-remove{color:var(--danger);cursor:pointer;font-size:14px;line-height:1;flex-shrink:0;background:none;border:none;padding:2px;}
+  .cat-btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:9px 10px;text-align:right;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;gap:2px;}
+  .cat-btn .tag{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:999px;width:fit-content;}
+  .cat-btn .label{font-size:11.5px;}
+  .cat-btn.selected{border-color:var(--copper);box-shadow:inset 0 0 0 1px var(--copper);}
+  .tag.pos{background:var(--pos-bg);color:var(--pos);}
+  .tag.minor{background:var(--minor-bg);color:var(--minor);}
+  .tag.moderate{background:var(--moderate-bg);color:var(--moderate);}
+  .tag.serious{background:var(--serious-bg);color:var(--serious);}
+
+  textarea.note{width:100%;min-height:64px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:12.5px;resize:none;background:var(--sand);color:var(--ink);}
+
+  .send-btn{position:sticky;bottom:0;width:100%;margin-top:2px;}
+
+  .toast{
+    position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+    background:var(--teal-deep);color:#fff;padding:10px 18px;border-radius:999px;
+    font-size:12.5px;z-index:50;display:none;
+  }
+  .toast.show{display:block;}
+
+  .status-line{font-size:11px;color:var(--ink-soft);text-align:center;margin-top:8px;}
+  .status-line.err{color:var(--danger);}
+
+  nav.tabbar{flex-shrink:0;display:flex;justify-content:space-around;align-items:center;padding:8px 6px 14px;background:var(--card);border-top:1px solid var(--line);}
+  .tab-item{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;color:var(--ink-soft);}
+  .tab-item.active{color:var(--teal);}
+</style>
+</head>
+<body>
+
+<div class="device">
+  <div class="screen">
+    <div class="notch"></div>
+
+    <!-- ========== LOGIN: STEP 1 — EMPLOYEE NUMBER ========== -->
+    <div id="login-step1" class="login-wrap">
+      <div class="login-brand">
+        <div class="mark">قم</div>
+        <h1>قِوام</h1>
+        <p>مدرسة الرويس للبنين</p>
+      </div>
+      <div class="field">
+        <label>الرقم الوظيفي</label>
+        <input type="text" id="employee-number-input" placeholder="أدخل رقم ملفك الوظيفي" inputmode="numeric">
+      </div>
+      <button class="btn" id="continue-btn">متابعة</button>
+      <div class="status-line err" id="step1-error" style="display:none;"></div>
+    </div>
+
+    <!-- ========== LOGIN: STEP 2 — CONFIRM NAME + PASSWORD ========== -->
+    <div id="login-step2" class="login-wrap" style="display:none;">
+      <div class="card">
+        <p class="hint" style="margin-bottom:4px;">أهلاً بك</p>
+        <div class="welcome-name" id="welcome-name">—</div>
+        <div class="field">
+          <label>كلمة المرور</label>
+          <input type="password" id="password-input" placeholder="••••••••">
+        </div>
+        <button class="btn" id="login-btn">تسجيل الدخول</button>
+        <div class="status-line err" id="step2-error" style="display:none;"></div>
+      </div>
+      <button class="btn ghost" id="back-btn">ليس أنت؟ رجوع</button>
+    </div>
+
+    <!-- ========== MAIN APP ========== -->
+    <div id="app-main" style="display:none; flex:1; display:none; flex-direction:column;">
+      <header>
+        <div>
+          <h1>تسجيل ملاحظة</h1>
+          <div class="school-tag" id="header-class-tag">مدرسة الرويس للبنين</div>
+        </div>
+        <div class="avatar" id="header-avatar">؟</div>
+      </header>
+
+      <div class="content">
+
+        <div class="card">
+          <h2>الصف</h2>
+          <p class="hint">اختر صف الطالب أولاً</p>
+          <div class="field">
+            <div class="picker-trigger" id="class-trigger">
+              <span>اختر الصف</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+            <div class="picker-panel" id="class-panel">
+              <div class="picker-list" id="class-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>الطالب</h2>
+          <p class="hint" id="student-hint">اختر الصف أولًا لعرض طلابه</p>
+          <div class="field">
+            <div class="picker-trigger" id="picker-trigger" style="opacity:.5;pointer-events:none;">
+              <span>اختر طالبًا من القائمة</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+            <div class="picker-panel" id="picker-panel">
+              <input class="picker-search" id="picker-search" placeholder="ابحث بالاسم داخل الصف…">
+              <div class="picker-list" id="picker-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>نوع الملاحظة</h2>
+          <p class="hint">اختر التصنيف المناسب</p>
+          <div id="cat-groups"></div>
+        </div>
+
+        <div class="card">
+          <h2>وصف مختصر</h2>
+          <textarea class="note" id="note-input" placeholder="اكتب وصفًا مختصرًا للملاحظة…"></textarea>
+
+          <div class="attach-row">
+            <div class="attach-btn" id="attach-photo-btn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+              صورة
+            </div>
+            <div class="attach-btn" id="attach-video-btn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>
+              فيديو
+            </div>
+            <div class="attach-btn" id="attach-audio-btn">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+              <span id="audio-btn-label">صوت</span>
+            </div>
+          </div>
+          <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none;">
+          <input type="file" id="video-input" accept="video/*" capture="environment" style="display:none;">
+          <p class="attach-hint">سيتم حفظ المرفقات مع السجل. لإرسالها ضمن رسالة واتساب، أرفقها يدويًا بعد الضغط على "إرسال".</p>
+
+          <div class="media-list" id="media-list"></div>
+        </div>
+
+        <div class="card">
+          <h2>معاينة رسالة واتساب</h2>
+          <p class="hint">هكذا ستظهر الرسالة لولي الأمر</p>
+          <div class="wa-phone">
+            <div class="wa-header">
+              <span class="mini-avatar" style="background:#25D366;">و.أ</span>
+              <span id="wa-preview-name">ولي أمر الطالب</span>
+            </div>
+            <div class="wa-bubble placeholder" id="wa-preview-bubble">اختر الطالب ونوع الملاحظة لمعاينة الرسالة</div>
+          </div>
+        </div>
+
+
+        <button class="btn send-btn" id="send-btn" disabled>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M20.5 3.5 2 10l7 3 3 7 8.5-16.5Z"/></svg>
+          إرسال إلى ولي الأمر
+        </button>
+        <div class="status-line" id="send-status"></div>
+      </div>
+
+      <nav class="tabbar">
+        <div class="tab-item active">تسجيل</div>
+        <div class="tab-item" id="logout-btn">تسجيل الخروج</div>
+      </nav>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+
+// =====================================================================
+// FILL THESE IN — Supabase project → Settings → API
+// =====================================================================
+const SUPABASE_URL = 'https://afcvnwmhdcgzjlomablx.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_2a2EonsQFdoUCgW54mr2QA_5sMvFy-x';
+const EMAIL_DOMAIN = 'rawais-behavior.local';           // synthetic login domain used for all staff
+const SCHOOL_NAME = 'مدرسة الرويس للبنين';
+// =====================================================================
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let pendingEmployeeNumber = null;
+let currentAppUser = null;   // row from public.users
+let categories = [];
+let selectedCategory = null;
+let selectedStudent = null;  // {id, full_name, phone, class_label}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=> t.classList.remove('show'), 3200);
+}
+
+function initials(name){
+  const parts = name.trim().split(' ');
+  return parts[0] ? parts[0][0] : '؟';
+}
+
+// ---------- LOGIN STEP 1: look up name by employee number ----------
+document.getElementById('continue-btn').addEventListener('click', async ()=>{
+  const errEl = document.getElementById('step1-error');
+  errEl.style.display = 'none';
+  const val = document.getElementById('employee-number-input').value.trim();
+  if(!val){
+    errEl.textContent = 'أدخل الرقم الوظيفي أولاً';
+    errEl.style.display = 'block';
+    return;
+  }
+  const btn = document.getElementById('continue-btn');
+  btn.disabled = true; btn.textContent = 'جارٍ البحث…';
+
+  const { data, error } = await supabase.rpc('lookup_employee_name', { p_employee_file_number: val });
+
+  btn.disabled = false; btn.textContent = 'متابعة';
+
+  if(error || !data){
+    errEl.textContent = 'لم يتم العثور على هذا الرقم الوظيفي';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  pendingEmployeeNumber = val;
+  document.getElementById('welcome-name').textContent = data;
+  document.getElementById('login-step1').style.display = 'none';
+  document.getElementById('login-step2').style.display = 'flex';
+  document.getElementById('password-input').focus();
+});
+
+document.getElementById('back-btn').addEventListener('click', ()=>{
+  pendingEmployeeNumber = null;
+  document.getElementById('password-input').value = '';
+  document.getElementById('step2-error').style.display = 'none';
+  document.getElementById('login-step2').style.display = 'none';
+  document.getElementById('login-step1').style.display = 'flex';
+});
+
+// ---------- LOGIN STEP 2: real password sign-in ----------
+document.getElementById('login-btn').addEventListener('click', async ()=>{
+  const errEl = document.getElementById('step2-error');
+  errEl.style.display = 'none';
+  const password = document.getElementById('password-input').value;
+  if(!password){
+    errEl.textContent = 'أدخل كلمة المرور';
+    errEl.style.display = 'block';
+    return;
+  }
+  const btn = document.getElementById('login-btn');
+  btn.disabled = true; btn.textContent = 'جارٍ الدخول…';
+
+  const email = `${pendingEmployeeNumber}@${EMAIL_DOMAIN}`;
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+  btn.disabled = false; btn.textContent = 'تسجيل الدخول';
+
+  if(error){
+    errEl.textContent = 'كلمة المرور غير صحيحة';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  await loadCurrentUserAndEnterApp();
+});
+
+async function loadCurrentUserAndEnterApp(){
+  const { data, error } = await supabase.rpc('current_app_user');
+  if(error || !data || (Array.isArray(data) && data.length === 0)){
+    showToast('تعذر تحميل بيانات المستخدم');
+    return;
+  }
+  currentAppUser = Array.isArray(data) ? data[0] : data;
+
+  document.getElementById('login-step1').style.display = 'none';
+  document.getElementById('login-step2').style.display = 'none';
+  document.getElementById('app-main').style.display = 'flex';
+  document.getElementById('header-avatar').textContent = initials(currentAppUser.full_name);
+  document.getElementById('header-class-tag').textContent = `${SCHOOL_NAME} — ${currentAppUser.full_name}`;
+
+  await loadCategories();
+}
+
+// ---------- LOGOUT ----------
+document.getElementById('logout-btn').addEventListener('click', async ()=>{
+  await supabase.auth.signOut();
+  currentAppUser = null;
+  selectedStudent = null;
+  selectedCategory = null;
+  selectedClass = null;
+  allClasses = [];
+  classRoster = [];
+  document.getElementById('app-main').style.display = 'none';
+  document.getElementById('login-step1').style.display = 'flex';
+  document.getElementById('employee-number-input').value = '';
+  document.getElementById('password-input').value = '';
+});
+
+// ---------- CLASS PICKER (loaded once after login) ----------
+const classTrigger = document.getElementById('class-trigger');
+const classPanel = document.getElementById('class-panel');
+const classList = document.getElementById('class-list');
+let allClasses = [];
+let selectedClass = null; // {id, label_ar}
+
+classTrigger.addEventListener('click', async ()=>{
+  classPanel.classList.toggle('open');
+  if(classPanel.classList.contains('open') && allClasses.length === 0){
+    await loadClasses();
+  }
+});
+
+async function loadClasses(){
+  classList.innerHTML = '<div class="picker-loading">جارٍ التحميل…</div>';
+  const { data, error } = await supabase
+    .from('classes')
+    .select('id, grade, section, label_ar')
+    .order('grade')
+    .order('section');
+
+  if(error || !data){
+    classList.innerHTML = `<div class="picker-empty">تعذر تحميل قائمة الصفوف</div>`;
+    return;
+  }
+  // grade comes back as text, so sort numerically rather than lexicographically (avoids "10" before "5")
+  allClasses = data.sort((a,b)=> (parseInt(a.grade)-parseInt(b.grade)) || (parseInt(a.section)-parseInt(b.section)));
+
+  classList.innerHTML = '';
+  allClasses.forEach(c=>{
+    const row = document.createElement('div');
+    row.className = 'picker-row';
+    row.innerHTML = `<div class="pname">${c.label_ar}</div>`;
+    row.addEventListener('click', ()=>{
+      selectedClass = c;
+      classTrigger.innerHTML = `<span class="chosen">${c.label_ar}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>`;
+      classTrigger.classList.add('filled');
+      classPanel.classList.remove('open');
+
+      // a new class invalidates any previously chosen student
+      selectedStudent = null;
+      trigger.innerHTML = `<span>اختر طالبًا من القائمة</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>`;
+      trigger.classList.remove('filled');
+      trigger.style.opacity = '1';
+      trigger.style.pointerEvents = 'auto';
+      document.getElementById('student-hint').textContent = `طلاب صف ${c.label_ar}`;
+      updateSendButtonState();
+      updateMessagePreview();
+    });
+    classList.appendChild(row);
+  });
+}
+
+// ---------- STUDENT PICKER (scoped to the chosen class) ----------
+const trigger = document.getElementById('picker-trigger');
+const panel = document.getElementById('picker-panel');
+const search = document.getElementById('picker-search');
+const list = document.getElementById('picker-list');
+let classRoster = []; // cached students for the currently selected class
+
+trigger.addEventListener('click', async ()=>{
+  if(!selectedClass) return;
+  panel.classList.toggle('open');
+  if(panel.classList.contains('open')){
+    search.value = '';
+    search.focus();
+    await loadClassRoster();
+    renderStudentList(classRoster);
+  }
+});
+
+search.addEventListener('input', ()=>{
+  const q = search.value.trim();
+  const filtered = q ? classRoster.filter(s => s.full_name.includes(q)) : classRoster;
+  renderStudentList(filtered);
+});
+
+async function loadClassRoster(){
+  list.innerHTML = '<div class="picker-loading">جارٍ التحميل…</div>';
+  const { data, error } = await supabase
+    .from('students')
+    .select('id, full_name, national_id, guardians(phone)')
+    .eq('class_id', selectedClass.id)
+    .order('full_name');
+
+  if(error || !data){
+    classRoster = [];
+    list.innerHTML = `<div class="picker-empty">تعذر تحميل طلاب هذا الصف</div>`;
+    return;
+  }
+  classRoster = data;
+}
+
+function renderStudentList(students){
+  if(!students || students.length === 0){
+    list.innerHTML = `<div class="picker-empty">لا يوجد طالب بهذا الاسم في هذا الصف</div>`;
+    return;
+  }
+  list.innerHTML = '';
+  students.forEach(s=>{
+    const phone = s.guardians && s.guardians.length ? s.guardians[0].phone : null;
+    const row = document.createElement('div');
+    row.className = 'picker-row';
+    row.innerHTML = `
+      <div class="mini-avatar">${initials(s.full_name)}</div>
+      <div class="pname">${s.full_name}<div class="pclass">${phone ? '' : 'لا يوجد رقم'}</div></div>
+    `;
+    row.addEventListener('click', ()=>{
+      selectedStudent = { id: s.id, full_name: s.full_name, phone, class_label: selectedClass.label_ar };
+      trigger.innerHTML = `
+        <span class="chosen"><span class="mini-avatar">${initials(s.full_name)}</span>${s.full_name}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+      `;
+      trigger.classList.add('filled');
+      panel.classList.remove('open');
+      updateSendButtonState();
+      updateMessagePreview();
+    });
+    list.appendChild(row);
+  });
+}
+
+// ---------- BEHAVIOR CATEGORIES (loaded once after login, grouped by type/severity) ----------
+async function loadCategories(){
+  const { data, error } = await supabase.from('behavior_categories').select('*');
+  if(error || !data){
+    showToast('تعذر تحميل تصنيفات السلوك');
+    return;
+  }
+  categories = data;
+  const container = document.getElementById('cat-groups');
+  container.innerHTML = '';
+
+  const groupDefs = [
+    { key: 'positive', title: 'إيجابي', tagClass: 'pos', match: c => c.type === 'positive' },
+    { key: 'minor',    title: 'بسيط',   tagClass: 'minor',    match: c => c.severity === 'minor' },
+    { key: 'moderate', title: 'متوسط',  tagClass: 'moderate', match: c => c.severity === 'moderate' },
+    { key: 'serious',  title: 'جسيم',   tagClass: 'serious',  match: c => c.severity === 'serious' },
+  ];
+
+  groupDefs.forEach(g=>{
+    const items = categories.filter(g.match);
+    if(items.length === 0) return;
+
+    const groupEl = document.createElement('div');
+    groupEl.className = 'cat-group';
+    groupEl.innerHTML = `<div class="cat-group-title ${g.tagClass}"><span class="dot"></span>${g.title}</div>`;
+
+    const grid = document.createElement('div');
+    grid.className = 'cat-grid';
+
+    items.forEach(c=>{
+      const btn = document.createElement('div');
+      btn.className = 'cat-btn';
+      btn.innerHTML = `<span class="label">${c.label_ar}</span>`;
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('.cat-btn').forEach(x=>x.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedCategory = c;
+        updateSendButtonState();
+        updateMessagePreview();
+      });
+      grid.appendChild(btn);
+    });
+
+    groupEl.appendChild(grid);
+    container.appendChild(groupEl);
+  });
+}
+
+function updateSendButtonState(){
+  document.getElementById('send-btn').disabled = !(selectedStudent && selectedCategory);
+}
+
+// ---------- MESSAGE BUILDING (shared by the live preview and the actual send) ----------
+function buildMessage(student, category, note){
+  const firstName = student.full_name.split(' ')[0];
+  const dateStr = new Date().toLocaleDateString('ar-OM', { day: 'numeric', month: 'numeric' });
+  if(category.type === 'positive'){
+    return `السلام عليكم ورحمة الله وبركاته 🌟\nنود إعلامكم بأن ابنكم ${firstName} حصل اليوم ${dateStr} على ملاحظة إيجابية:\n"${category.label_ar}"\n${note}\n\nمع خالص التقدير،\n${currentAppUser.full_name} - ${SCHOOL_NAME}`;
+  } else if(category.severity === 'minor'){
+    return `السلام عليكم ورحمة الله وبركاته\nنفيدكم بأن ابنكم ${firstName} كان لديه اليوم ${dateStr} ملاحظة بسيطة حول:\n"${category.label_ar}"\n${note}\n\nنأمل متابعتكم معه في المنزل.\n\n${currentAppUser.full_name} - ${SCHOOL_NAME}`;
+  } else if(category.severity === 'moderate'){
+    return `السلام عليكم ورحمة الله وبركاته\nنود إعلامكم بأن إدارة المدرسة سجّلت اليوم ${dateStr} ملاحظة سلوكية لابنكم ${firstName} بخصوص:\n"${category.label_ar}"\n${note}\n\nنرجو التكرم بالتواصل مع إدارة المدرسة لمناقشة الموضوع.\n\n${currentAppUser.full_name} - ${SCHOOL_NAME}`;
+  } else {
+    return `السلام عليكم ورحمة الله وبركاته\nنأسف لإبلاغكم بوقوع حادثة سلوكية جادة اليوم ${dateStr} تخص ابنكم ${firstName}، تتعلق بـ:\n"${category.label_ar}"\n\nيرجى التكرم بالحضور إلى المدرسة في أقرب وقت ممكن لمناقشة الموضوع مع الإدارة.\n\nإدارة ${SCHOOL_NAME}`;
+  }
+}
+
+function updateMessagePreview(){
+  const bubble = document.getElementById('wa-preview-bubble');
+  const nameEl = document.getElementById('wa-preview-name');
+
+  if(!selectedStudent || !selectedCategory){
+    bubble.className = 'wa-bubble placeholder';
+    bubble.textContent = 'اختر الطالب ونوع الملاحظة لمعاينة الرسالة';
+    nameEl.textContent = 'ولي أمر الطالب';
+    return;
+  }
+
+  const note = document.getElementById('note-input').value.trim();
+  const message = buildMessage(selectedStudent, selectedCategory, note);
+  const timeStr = new Date().toLocaleTimeString('ar-OM', { hour: 'numeric', minute: '2-digit' });
+
+  nameEl.textContent = `ولي أمر ${selectedStudent.full_name.split(' ')[0]}`;
+  bubble.className = 'wa-bubble';
+  bubble.innerHTML = ''; // clear before rebuilding with the time stamp appended
+  bubble.textContent = message;
+  const timeSpan = document.createElement('span');
+  timeSpan.className = 'wa-time';
+  timeSpan.textContent = `${timeStr} ✓✓`;
+  bubble.appendChild(timeSpan);
+}
+
+document.getElementById('note-input').addEventListener('input', ()=>{
+  clearTimeout(window.__notePreviewDebounce);
+  window.__notePreviewDebounce = setTimeout(updateMessagePreview, 200);
+});
+
+// ---------- MEDIA ATTACHMENTS (photo / video / voice note) ----------
+let pendingMedia = []; // {kind: 'image'|'video'|'audio', blob, name}
+let mediaRecorder = null;
+let recordedChunks = [];
+
+function mediaIcon(kind){
+  if(kind === 'image') return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>';
+  if(kind === 'video') return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>';
+  return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>';
+}
+
+function renderMediaList(){
+  const listEl = document.getElementById('media-list');
+  listEl.innerHTML = '';
+  pendingMedia.forEach((m, idx)=>{
+    const chip = document.createElement('div');
+    chip.className = 'media-chip';
+    chip.innerHTML = `
+      <span class="m-icon">${mediaIcon(m.kind)}</span>
+      <span class="m-name">${m.name}</span>
+      <button type="button" class="m-remove" aria-label="إزالة المرفق">×</button>
+    `;
+    chip.querySelector('.m-remove').addEventListener('click', ()=>{
+      pendingMedia.splice(idx, 1);
+      renderMediaList();
+    });
+    listEl.appendChild(chip);
+  });
+}
+
+document.getElementById('attach-photo-btn').addEventListener('click', ()=>{
+  document.getElementById('photo-input').click();
+});
+document.getElementById('attach-video-btn').addEventListener('click', ()=>{
+  document.getElementById('video-input').click();
+});
+
+document.getElementById('photo-input').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  pendingMedia.push({ kind: 'image', blob: file, name: file.name });
+  renderMediaList();
+  e.target.value = '';
+});
+
+document.getElementById('video-input').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  pendingMedia.push({ kind: 'video', blob: file, name: file.name });
+  renderMediaList();
+  e.target.value = '';
+});
+
+document.getElementById('attach-audio-btn').addEventListener('click', async ()=>{
+  const btn = document.getElementById('attach-audio-btn');
+  const label = document.getElementById('audio-btn-label');
+
+  if(mediaRecorder && mediaRecorder.state === 'recording'){
+    mediaRecorder.stop();
+    return;
+  }
+
+  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
+    showToast('التسجيل الصوتي غير مدعوم في هذا المتصفح');
+    return;
+  }
+
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recordedChunks = [];
+    mediaRecorder = new MediaRecorder(stream);
+    mediaRecorder.ondataavailable = (e)=>{ if(e.data.size > 0) recordedChunks.push(e.data); };
+    mediaRecorder.onstop = ()=>{
+      const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+      const name = `تسجيل-صوتي-${Date.now()}.webm`;
+      pendingMedia.push({ kind: 'audio', blob, name });
+      renderMediaList();
+      stream.getTracks().forEach(t => t.stop());
+      btn.classList.remove('recording');
+      label.textContent = 'صوت';
+    };
+    mediaRecorder.start();
+    btn.classList.add('recording');
+    label.textContent = 'إيقاف';
+  }catch(err){
+    showToast('تعذر الوصول إلى الميكروفون');
+  }
+});
+
+async function uploadPendingMedia(incidentId){
+  for(const m of pendingMedia){
+    const path = `${incidentId}/${Date.now()}-${m.name}`;
+    const { error: uploadErr } = await supabase.storage
+      .from('incident-media')
+      .upload(path, m.blob);
+
+    if(uploadErr){
+      showToast(`تعذر رفع مرفق: ${m.name}`);
+      continue;
+    }
+
+    await supabase.from('media').insert({
+      incident_id: incidentId,
+      kind: m.kind,
+      storage_path: path
+    });
+  }
+}
+
+
+// ---------- SEND: insert incident + notification, open wa.me ----------
+document.getElementById('send-btn').addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('send-status');
+  statusEl.className = 'status-line';
+  statusEl.textContent = '';
+
+  if(!selectedStudent || !selectedCategory){
+    statusEl.className = 'status-line err';
+    statusEl.textContent = 'اختر الطالب ونوع الملاحظة أولاً';
+    return;
+  }
+
+  const note = document.getElementById('note-input').value.trim();
+  const btn = document.getElementById('send-btn');
+  btn.disabled = true;
+  statusEl.textContent = 'جارٍ الحفظ…';
+
+  const { data: incident, error: incidentErr } = await supabase
+    .from('incidents')
+    .insert({
+      student_id: selectedStudent.id,
+      category_id: selectedCategory.id,
+      recorded_by: currentAppUser.id,
+      note: note || null
+    })
+    .select()
+    .single();
+
+  if(incidentErr){
+    statusEl.className = 'status-line err';
+    statusEl.textContent = 'تعذر حفظ الملاحظة — حاول مرة أخرى';
+    btn.disabled = false;
+    return;
+  }
+
+  if(pendingMedia.length > 0){
+    statusEl.textContent = 'جارٍ رفع المرفقات…';
+    await uploadPendingMedia(incident.id);
+  }
+
+  if(!selectedStudent.phone){
+    statusEl.className = 'status-line err';
+    statusEl.textContent = 'تم حفظ الملاحظة، لكن لا يوجد رقم هاتف لولي الأمر لإرسالها';
+    btn.disabled = false;
+    resetForm();
+    return;
+  }
+
+  // reuse the same builder that powers the live preview, so what gets sent
+  // always matches exactly what the teacher already saw on screen
+  const message = buildMessage(selectedStudent, selectedCategory, note);
+
+  // find the guardian row id (needed for the notifications FK)
+  const { data: guardianRow } = await supabase
+    .from('guardians')
+    .select('id')
+    .eq('student_id', selectedStudent.id)
+    .eq('is_primary', true)
+    .limit(1)
+    .single();
+
+  if(guardianRow){
+    await supabase.from('notifications').insert({
+      incident_id: incident.id,
+      guardian_id: guardianRow.id,
+      status: 'pending'
+    });
+  }
+
+  const waLink = `https://wa.me/968${selectedStudent.phone}?text=${encodeURIComponent(message)}`;
+  window.open(waLink, '_blank');
+
+  statusEl.className = 'status-line';
+  statusEl.textContent = 'تم الحفظ — تحقق من واتساب لإتمام الإرسال';
+  showToast('تم حفظ الملاحظة');
+  btn.disabled = false;
+  resetForm();
+});
+
+function resetForm(){
+  selectedStudent = null;
+  selectedCategory = null;
+  pendingMedia = [];
+  renderMediaList();
+  document.getElementById('note-input').value = '';
+  document.querySelectorAll('.cat-btn').forEach(x=>x.classList.remove('selected'));
+  trigger.innerHTML = `<span>اختر طالبًا من القائمة</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>`;
+  trigger.classList.remove('filled');
+  updateSendButtonState();
+  updateMessagePreview();
+}
+
+// ---------- on load: resume session if already logged in ----------
+(async ()=>{
+  const { data: { session } } = await supabase.auth.getSession();
+  if(session){
+    await loadCurrentUserAndEnterApp();
+  }
+})();
+</script>
+</body>
+</html>
