@@ -21,20 +21,28 @@
     --danger:#B23A34;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;background:var(--sand-deep);}
-  body{font-family:'IBM Plex Sans Arabic', sans-serif;color:var(--ink);display:flex;justify-content:center;padding:24px 0;}
+  html,body{margin:0;background:var(--sand-deep); height:100%;}
+  body{font-family:'IBM Plex Sans Arabic', sans-serif;color:var(--ink);}
   h1,h2{font-family:'Almarai', sans-serif;}
 
-  .device{width:390px;min-height:844px;background:#111;border-radius:44px;padding:14px;box-shadow:0 20px 50px rgba(15,61,62,0.25);}
-  .screen{width:100%;min-height:816px;background:var(--sand);border-radius:32px;overflow:hidden;position:relative;display:flex;flex-direction:column;}
-  .notch{position:absolute;top:0;left:50%;transform:translateX(-50%);width:120px;height:26px;background:#111;border-radius:0 0 16px 16px;z-index:20;}
+  .app-shell{
+    max-width:480px;
+    margin:0 auto;
+    min-height:100vh;
+    background:var(--sand);
+    display:flex;
+    flex-direction:column;
+  }
+  @media (min-width: 480px){
+    .app-shell{ box-shadow: 0 0 0 1px var(--line); }
+  }
 
-  header{padding:38px 18px 12px;background:var(--sand);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+  header{padding:20px 18px 12px;background:var(--sand);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
   header h1{font-size:17px;margin:0;color:var(--teal-deep);}
   .school-tag{font-size:10.5px;color:var(--ink-soft);}
   .avatar{width:30px;height:30px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;}
 
-  .content{flex:1;overflow-y:auto;padding:6px 16px 16px;}
+  .content{padding:6px 16px 16px;}
 
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;}
   .card h2{font-size:13.5px;margin:0 0 3px;color:var(--teal-deep);}
@@ -117,6 +125,20 @@
   textarea.note{width:100%;min-height:64px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-family:inherit;font-size:12.5px;resize:none;background:var(--sand);color:var(--ink);}
 
   .send-btn{position:sticky;bottom:0;width:100%;margin-top:2px;}
+  .btn.whatsapp{background:#25D366;}
+
+  .stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:14px;}
+  .stat-card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;}
+  .stat-card .num{font-family:'Almarai',sans-serif;font-size:22px;font-weight:800;color:var(--teal-deep);}
+  .stat-card .lbl{font-size:10.5px;color:var(--ink-soft);margin-top:2px;}
+
+  .feed-item{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);}
+  .feed-item:last-child{border-bottom:none;}
+  .feed-icon{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;}
+  .feed-body{flex:1;}
+  .feed-title{font-size:12.5px;font-weight:600;}
+  .feed-sub{font-size:11px;color:var(--ink-soft);margin-top:2px;}
+  .feed-time{font-size:10px;color:var(--ink-soft);white-space:nowrap;flex-shrink:0;}
 
   .toast{
     position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
@@ -128,16 +150,14 @@
   .status-line{font-size:11px;color:var(--ink-soft);text-align:center;margin-top:8px;}
   .status-line.err{color:var(--danger);}
 
-  nav.tabbar{flex-shrink:0;display:flex;justify-content:space-around;align-items:center;padding:8px 6px 14px;background:var(--card);border-top:1px solid var(--line);}
+  nav.tabbar{position:sticky;bottom:0;display:flex;justify-content:space-around;align-items:center;padding:8px 6px 14px;background:var(--card);border-top:1px solid var(--line);z-index:10;}
   .tab-item{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;color:var(--ink-soft);}
   .tab-item.active{color:var(--teal);}
 </style>
 </head>
 <body>
 
-<div class="device">
-  <div class="screen">
-    <div class="notch"></div>
+<div class="app-shell">
 
     <!-- ========== LOGIN: STEP 1 — EMPLOYEE NUMBER ========== -->
     <div id="login-step1" class="login-wrap">
@@ -181,6 +201,7 @@
 
       <div class="content">
 
+      <div id="screen-notes">
         <div class="card">
           <h2>الصف</h2>
           <p class="hint">اختر صف الطالب أولاً</p>
@@ -220,25 +241,26 @@
           <h2>وصف مختصر</h2>
           <textarea class="note" id="note-input" placeholder="اكتب وصفًا مختصرًا للملاحظة…"></textarea>
 
-          <div class="attach-row">
-            <div class="attach-btn" id="attach-photo-btn">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
-              صورة
+          <div id="media-upload-section" style="display:none;">
+            <div class="attach-row">
+              <div class="attach-btn" id="attach-photo-btn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+                صورة
+              </div>
+              <div class="attach-btn" id="attach-video-btn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>
+                فيديو
+              </div>
+              <div class="attach-btn" id="attach-audio-btn">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+                <span id="audio-btn-label">صوت</span>
+              </div>
             </div>
-            <div class="attach-btn" id="attach-video-btn">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>
-              فيديو
-            </div>
-            <div class="attach-btn" id="attach-audio-btn">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
-              <span id="audio-btn-label">صوت</span>
-            </div>
+            <p class="attach-hint">سيتم حفظ المرفقات مع السجل. لإرسالها ضمن رسالة واتساب، أرفقها يدويًا بعد الضغط على "إرسال".</p>
+            <div class="media-list" id="media-list"></div>
           </div>
           <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none;">
           <input type="file" id="video-input" accept="video/*" capture="environment" style="display:none;">
-          <p class="attach-hint">سيتم حفظ المرفقات مع السجل. لإرسالها ضمن رسالة واتساب، أرفقها يدويًا بعد الضغط على "إرسال".</p>
-
-          <div class="media-list" id="media-list"></div>
         </div>
 
         <div class="card">
@@ -253,7 +275,6 @@
           </div>
         </div>
 
-
         <button class="btn send-btn" id="send-btn" disabled>
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M20.5 3.5 2 10l7 3 3 7 8.5-16.5Z"/></svg>
           إرسال إلى ولي الأمر
@@ -261,13 +282,102 @@
         <div class="status-line" id="send-status"></div>
       </div>
 
+      <div id="screen-attendance" style="display:none;">
+        <div class="card">
+          <h2>الصف</h2>
+          <p class="hint">اختر صف الطالب أولاً</p>
+          <div class="field">
+            <div class="picker-trigger" id="att-class-trigger">
+              <span>اختر الصف</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+            <div class="picker-panel" id="att-class-panel">
+              <div class="picker-list" id="att-class-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>الطالب</h2>
+          <p class="hint" id="att-student-hint">اختر الصف أولًا لعرض طلابه</p>
+          <div class="field">
+            <div class="picker-trigger" id="att-picker-trigger" style="opacity:.5;pointer-events:none;">
+              <span>اختر طالبًا من القائمة</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+            <div class="picker-panel" id="att-picker-panel">
+              <input class="picker-search" id="att-picker-search" placeholder="ابحث بالاسم داخل الصف…">
+              <div class="picker-list" id="att-picker-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>نوع الحالة</h2>
+          <p class="hint">اختر تأخر أو غياب — سيُحسب العدد التراكمي لهذا العام تلقائيًا</p>
+          <div class="cat-grid">
+            <div class="cat-btn" id="att-type-late"><span class="label">تأخر</span></div>
+            <div class="cat-btn" id="att-type-absent"><span class="label">غياب يوم كامل</span></div>
+          </div>
+          <div id="att-tier-result" style="display:none;margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--sand);border:1px solid var(--line);font-size:12px;"></div>
+        </div>
+
+        <div class="card">
+          <h2>وصف مختصر (اختياري)</h2>
+          <textarea class="note" id="att-note-input" placeholder="أي تفاصيل إضافية…"></textarea>
+        </div>
+
+        <div class="card">
+          <h2>معاينة رسالة واتساب</h2>
+          <p class="hint">هكذا ستظهر الرسالة لولي الأمر</p>
+          <div class="wa-phone">
+            <div class="wa-header">
+              <span class="mini-avatar" style="background:#25D366;">و.أ</span>
+              <span id="att-wa-preview-name">ولي أمر الطالب</span>
+            </div>
+            <div class="wa-bubble placeholder" id="att-wa-preview-bubble">اختر الطالب ونوع الحالة لمعاينة الرسالة</div>
+          </div>
+        </div>
+
+        <button class="btn" id="att-save-btn" disabled>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2Z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          حفظ السجل
+        </button>
+        <button class="btn whatsapp send-btn" id="att-whatsapp-btn" disabled style="margin-top:8px;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M20.5 3.5 2 10l7 3 3 7 8.5-16.5Z"/></svg>
+          إرسال لولي الأمر عبر واتساب
+        </button>
+        <div class="status-line" id="att-send-status"></div>
+      </div>
+
+      <div id="screen-news" style="display:none;">
+        <div class="stat-row" id="news-stats"></div>
+        <div class="card">
+          <h2>السجل المباشر</h2>
+          <p class="hint">أحدث الملاحظات وحالات الغياب المسجلة هذا الشهر</p>
+          <div id="news-feed"></div>
+        </div>
+      </div>
+
+      </div>
+
       <nav class="tabbar">
-        <div class="tab-item active">تسجيل</div>
+        <div class="tab-item active" id="tab-notes">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          الملاحظات
+        </div>
+        <div class="tab-item" id="tab-attendance" style="display:none;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          الغياب
+        </div>
+        <div class="tab-item" id="tab-news">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
+          أخبار وإحصائيات
+        </div>
         <div class="tab-item" id="logout-btn">تسجيل الخروج</div>
       </nav>
     </div>
 
-  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -383,7 +493,65 @@ async function loadCurrentUserAndEnterApp(){
   document.getElementById('header-avatar').textContent = initials(currentAppUser.full_name);
   document.getElementById('header-class-tag').textContent = `${SCHOOL_NAME} — ${currentAppUser.full_name}`;
 
+  // الغياب is admin-only — teachers never even see the tab
+  if(currentAppUser.role === 'admin'){
+    document.getElementById('tab-attendance').style.display = 'flex';
+  }
+
+  // photo/video/voice attachments — restricted to one named user per the principal
+  if(currentAppUser.can_upload_media){
+    document.getElementById('media-upload-section').style.display = 'block';
+  }
+
+  await loadVisibleClassIds();
   await loadCategories();
+}
+
+// ---------- TAB SWITCHING ----------
+const ALL_SCREENS = ['screen-notes', 'screen-attendance', 'screen-news'];
+const ALL_TABS = ['tab-notes', 'tab-attendance', 'tab-news'];
+
+function switchTab(activeTab, activeScreen, title){
+  ALL_TABS.forEach(id => document.getElementById(id).classList.toggle('active', id === activeTab));
+  ALL_SCREENS.forEach(id => document.getElementById(id).style.display = (id === activeScreen ? 'block' : 'none'));
+  document.querySelector('header h1').textContent = title;
+}
+
+document.getElementById('tab-notes').addEventListener('click', ()=>{
+  switchTab('tab-notes', 'screen-notes', 'تسجيل ملاحظة');
+});
+
+document.getElementById('tab-attendance').addEventListener('click', async ()=>{
+  switchTab('tab-attendance', 'screen-attendance', 'تسجيل غياب / تأخر');
+  if(attCategories.length === 0){
+    await loadAttCategories();
+  }
+});
+
+document.getElementById('tab-news').addEventListener('click', async ()=>{
+  switchTab('tab-news', 'screen-news', 'أخبار وإحصائيات');
+  await loadNewsAndStats();
+});
+
+
+// which classes the CURRENT user is actually allowed to see students in —
+// mirrors public.visible_class_ids() so the UI can show a clear permission
+// message instead of a misleading "no student found"
+let myVisibleClassIds = new Set();
+
+async function loadVisibleClassIds(){
+  const { data, error } = await supabase.rpc('visible_class_ids');
+  if(error || !data){
+    myVisibleClassIds = new Set();
+    return;
+  }
+  // defensive: handle either plain scalar array or array-of-objects shape
+  const ids = data.map(d => (typeof d === 'string' ? d : Object.values(d)[0]));
+  myVisibleClassIds = new Set(ids);
+}
+
+function isClassVisible(classId){
+  return !!currentAppUser && (currentAppUser.role === 'admin' || myVisibleClassIds.has(classId));
 }
 
 // ---------- LOGOUT ----------
@@ -468,17 +636,31 @@ trigger.addEventListener('click', async ()=>{
   panel.classList.toggle('open');
   if(panel.classList.contains('open')){
     search.value = '';
+
+    if(!isClassVisible(selectedClass.id)){
+      classRoster = [];
+      list.innerHTML = `<div class="picker-empty">ليس لديك صلاحية لهذا الصف</div>`;
+      return;
+    }
+
     search.focus();
     await loadClassRoster();
-    renderStudentList(classRoster);
+    refreshStudentList();
   }
 });
 
-search.addEventListener('input', ()=>{
+search.addEventListener('input', refreshStudentList);
+
+function refreshStudentList(){
+  if(!selectedClass) return;
+  if(!isClassVisible(selectedClass.id)){
+    list.innerHTML = `<div class="picker-empty">ليس لديك صلاحية لهذا الصف</div>`;
+    return;
+  }
   const q = search.value.trim();
   const filtered = q ? classRoster.filter(s => s.full_name.includes(q)) : classRoster;
   renderStudentList(filtered);
-});
+}
 
 async function loadClassRoster(){
   list.innerHTML = '<div class="picker-loading">جارٍ التحميل…</div>';
@@ -822,6 +1004,452 @@ function resetForm(){
   trigger.classList.remove('filled');
   updateSendButtonState();
   updateMessagePreview();
+}
+
+// =====================================================================
+// الغياب (attendance: lateness / absence) — admin-only screen
+// =====================================================================
+let attCategories = [];
+let attSelectedClass = null;
+let attSelectedStudent = null; // {id, full_name, phone}
+let attClassRoster = [];
+let attSelectedType = null; // 'late' | 'absent'
+let attSelectedTier = null; // matched row from attCategories, or null
+
+function gradeToBand(gradeStr){
+  const g = parseInt(gradeStr, 10);
+  if(g <= 4) return '1-4';
+  if(g <= 9) return '5-9';
+  return '10-12';
+}
+
+async function loadAttCategories(){
+  const { data, error } = await supabase.from('attendance_categories').select('*');
+  if(error || !data){
+    showToast('تعذر تحميل تصنيفات الغياب');
+    return;
+  }
+  attCategories = data;
+}
+
+// ---------- attendance class picker ----------
+const attClassTrigger = document.getElementById('att-class-trigger');
+const attClassPanel = document.getElementById('att-class-panel');
+const attClassList = document.getElementById('att-class-list');
+
+attClassTrigger.addEventListener('click', async ()=>{
+  attClassPanel.classList.toggle('open');
+  if(attClassPanel.classList.contains('open') && allClasses.length === 0){
+    await loadClasses(); // reuses the same class list loaded for الملاحظات
+  }
+  if(attClassPanel.classList.contains('open')){
+    renderAttClassList();
+  }
+});
+
+function renderAttClassList(){
+  attClassList.innerHTML = '';
+  allClasses.forEach(c=>{
+    const row = document.createElement('div');
+    row.className = 'picker-row';
+    row.innerHTML = `<div class="pname">${c.label_ar}</div>`;
+    row.addEventListener('click', ()=>{
+      attSelectedClass = c;
+      attClassTrigger.innerHTML = `<span class="chosen">${c.label_ar}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>`;
+      attClassTrigger.classList.add('filled');
+      attClassPanel.classList.remove('open');
+
+      attSelectedStudent = null;
+      const attTrigger = document.getElementById('att-picker-trigger');
+      attTrigger.innerHTML = `<span>اختر طالبًا من القائمة</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>`;
+      attTrigger.classList.remove('filled');
+      attTrigger.style.opacity = '1';
+      attTrigger.style.pointerEvents = 'auto';
+      document.getElementById('att-student-hint').textContent = `طلاب صف ${c.label_ar}`;
+      resetAttTierResult();
+      updateAttSaveButtonState(); invalidateAttReadyToSend();
+    });
+    attClassList.appendChild(row);
+  });
+}
+
+// ---------- attendance student picker ----------
+const attTrigger = document.getElementById('att-picker-trigger');
+const attPanel = document.getElementById('att-picker-panel');
+const attSearch = document.getElementById('att-picker-search');
+const attList = document.getElementById('att-picker-list');
+
+attTrigger.addEventListener('click', async ()=>{
+  if(!attSelectedClass) return;
+  attPanel.classList.toggle('open');
+  if(attPanel.classList.contains('open')){
+    attSearch.value = '';
+    attSearch.focus();
+    attList.innerHTML = '<div class="picker-loading">جارٍ التحميل…</div>';
+    const { data, error } = await supabase
+      .from('students')
+      .select('id, full_name, national_id, guardians(phone)')
+      .eq('class_id', attSelectedClass.id)
+      .order('full_name');
+    if(error || !data){
+      attClassRoster = [];
+      attList.innerHTML = `<div class="picker-empty">تعذر تحميل طلاب هذا الصف</div>`;
+      return;
+    }
+    attClassRoster = data;
+    renderAttStudentList(attClassRoster);
+  }
+});
+
+attSearch.addEventListener('input', ()=>{
+  const q = attSearch.value.trim();
+  const filtered = q ? attClassRoster.filter(s => s.full_name.includes(q)) : attClassRoster;
+  renderAttStudentList(filtered);
+});
+
+function renderAttStudentList(students){
+  if(!students || students.length === 0){
+    attList.innerHTML = `<div class="picker-empty">لا يوجد طالب بهذا الاسم في هذا الصف</div>`;
+    return;
+  }
+  attList.innerHTML = '';
+  students.forEach(s=>{
+    const phone = s.guardians && s.guardians.length ? s.guardians[0].phone : null;
+    const row = document.createElement('div');
+    row.className = 'picker-row';
+    row.innerHTML = `
+      <div class="mini-avatar">${initials(s.full_name)}</div>
+      <div class="pname">${s.full_name}<div class="pclass">${phone ? '' : 'لا يوجد رقم'}</div></div>
+    `;
+    row.addEventListener('click', ()=>{
+      attSelectedStudent = { id: s.id, full_name: s.full_name, phone };
+      attTrigger.innerHTML = `
+        <span class="chosen"><span class="mini-avatar">${initials(s.full_name)}</span>${s.full_name}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+      `;
+      attTrigger.classList.add('filled');
+      attPanel.classList.remove('open');
+      resetAttTierResult();
+      updateAttSaveButtonState(); invalidateAttReadyToSend();
+    });
+    attList.appendChild(row);
+  });
+}
+
+// ---------- attendance type selection + tier computation ----------
+document.getElementById('att-type-late').addEventListener('click', ()=> selectAttType('late'));
+document.getElementById('att-type-absent').addEventListener('click', ()=> selectAttType('absent'));
+
+async function selectAttType(kind){
+  if(!attSelectedStudent){
+    showToast('اختر الطالب أولًا');
+    return;
+  }
+  document.getElementById('att-type-late').classList.toggle('selected', kind === 'late');
+  document.getElementById('att-type-absent').classList.toggle('selected', kind === 'absent');
+  attSelectedType = kind;
+
+  const resultEl = document.getElementById('att-tier-result');
+  resultEl.style.display = 'block';
+  resultEl.textContent = 'جارٍ الحساب…';
+
+  const { count, error } = await supabase
+    .from('attendance_records')
+    .select('id', { count: 'exact', head: true })
+    .eq('student_id', attSelectedStudent.id)
+    .eq('kind', kind);
+
+  if(error){
+    resultEl.textContent = 'تعذر حساب العدد التراكمي';
+    attSelectedTier = null;
+    updateAttSaveButtonState(); invalidateAttReadyToSend();
+    return;
+  }
+
+  const newCount = (count || 0) + 1;
+  const band = gradeToBand(attSelectedClass.grade);
+
+  const applicable = attCategories
+    .filter(c => c.kind === kind && (c.grade_band === null || c.grade_band === band) && c.threshold_count <= newCount)
+    .sort((a,b) => b.threshold_count - a.threshold_count);
+
+  attSelectedTier = applicable.length > 0 ? applicable[0] : null;
+
+  const kindLabel = kind === 'late' ? 'تأخر' : 'غياب';
+  if(attSelectedTier){
+    resultEl.innerHTML = `<strong>${kindLabel} رقم ${newCount} هذا العام</strong><br>الإجراء المقرر: ${attSelectedTier.action_label_ar}`;
+  } else {
+    resultEl.innerHTML = `<strong>${kindLabel} رقم ${newCount} هذا العام</strong><br>لم يصل بعد إلى حد يستوجب إجراءً محددًا`;
+  }
+
+  updateAttSaveButtonState(); invalidateAttReadyToSend();
+  updateAttMessagePreview(newCount);
+}
+
+function resetAttTierResult(){
+  attSelectedType = null;
+  attSelectedTier = null;
+  document.getElementById('att-type-late').classList.remove('selected');
+  document.getElementById('att-type-absent').classList.remove('selected');
+  document.getElementById('att-tier-result').style.display = 'none';
+  updateAttMessagePreview(null);
+}
+
+function updateAttSaveButtonState(){
+  document.getElementById('att-save-btn').disabled = !(attSelectedStudent && attSelectedType);
+}
+
+// tracks whether a saved record currently matches what's on screen —
+// only true right after a successful save, and invalidated by any
+// change to student/type/note so what gets sent always matches a real record
+let attReadyToSend = null; // {message, phone} once saved, else null
+
+function invalidateAttReadyToSend(){
+  attReadyToSend = null;
+  document.getElementById('att-whatsapp-btn').disabled = true;
+}
+
+function buildAttendanceMessage(student, kind, newCount, tier, note){
+  const firstName = student.full_name.split(' ')[0];
+  const dateStr = new Date().toLocaleDateString('ar-OM', { day: 'numeric', month: 'numeric' });
+  const actionLine = tier ? `\nالإجراء المتخذ وفق لائحة شؤون الطلبة: ${tier.action_label_ar}` : '';
+  const noteLine = note ? `\n${note}` : '';
+
+  if(kind === 'late'){
+    return `السلام عليكم ورحمة الله وبركاته\nنفيدكم بأن ابنكم ${firstName} تأخر عن الحضور للمدرسة اليوم ${dateStr} (المرة ${newCount} هذا العام الدراسي).${actionLine}${noteLine}\n\n${currentAppUser.full_name} - ${SCHOOL_NAME}`;
+  }
+  return `السلام عليكم ورحمة الله وبركاته\nنفيدكم بأن ابنكم ${firstName} تغيّب عن المدرسة بدون عذر مقبول اليوم ${dateStr}. إجمالي أيام الغياب هذا العام الدراسي: ${newCount} يوم.${actionLine}${noteLine}\n\nإدارة ${SCHOOL_NAME}`;
+}
+
+function updateAttMessagePreview(newCount){
+  const bubble = document.getElementById('att-wa-preview-bubble');
+  const nameEl = document.getElementById('att-wa-preview-name');
+
+  if(!attSelectedStudent || !attSelectedType || newCount === null || newCount === undefined){
+    bubble.className = 'wa-bubble placeholder';
+    bubble.textContent = 'اختر الطالب ونوع الحالة لمعاينة الرسالة';
+    nameEl.textContent = 'ولي أمر الطالب';
+    return;
+  }
+
+  const note = document.getElementById('att-note-input').value.trim();
+  const message = buildAttendanceMessage(attSelectedStudent, attSelectedType, newCount, attSelectedTier, note);
+  const timeStr = new Date().toLocaleTimeString('ar-OM', { hour: 'numeric', minute: '2-digit' });
+
+  nameEl.textContent = `ولي أمر ${attSelectedStudent.full_name.split(' ')[0]}`;
+  bubble.className = 'wa-bubble';
+  bubble.innerHTML = '';
+  bubble.textContent = message;
+  const timeSpan = document.createElement('span');
+  timeSpan.className = 'wa-time';
+  timeSpan.textContent = `${timeStr} ✓✓`;
+  bubble.appendChild(timeSpan);
+}
+
+document.getElementById('att-note-input').addEventListener('input', ()=>{
+  invalidateAttReadyToSend();
+  clearTimeout(window.__attNoteDebounce);
+  window.__attNoteDebounce = setTimeout(()=>{
+    if(attSelectedType){
+      // recompute isn't needed for count, just re-render with same tier/count already known
+      const q = document.getElementById('att-tier-result').textContent;
+      const match = q.match(/(\d+)/);
+      updateAttMessagePreview(match ? parseInt(match[1], 10) : null);
+    }
+  }, 200);
+});
+
+// ---------- attendance save (record only, no message sent yet) ----------
+document.getElementById('att-save-btn').addEventListener('click', async ()=>{
+  const statusEl = document.getElementById('att-send-status');
+  statusEl.className = 'status-line';
+  statusEl.textContent = '';
+
+  if(!attSelectedStudent || !attSelectedType){
+    statusEl.className = 'status-line err';
+    statusEl.textContent = 'اختر الطالب ونوع الحالة أولًا';
+    return;
+  }
+
+  const note = document.getElementById('att-note-input').value.trim();
+  const saveBtn = document.getElementById('att-save-btn');
+  saveBtn.disabled = true;
+  statusEl.textContent = 'جارٍ الحفظ…';
+
+  const { error: recordErr } = await supabase
+    .from('attendance_records')
+    .insert({
+      student_id: attSelectedStudent.id,
+      recorded_by: currentAppUser.id,
+      kind: attSelectedType,
+      note: note || null
+    })
+    .select()
+    .single();
+
+  if(recordErr){
+    statusEl.className = 'status-line err';
+    statusEl.textContent = 'تعذر حفظ السجل — حاول مرة أخرى';
+    saveBtn.disabled = false;
+    return;
+  }
+
+  showToast('تم حفظ السجل');
+  saveBtn.disabled = false;
+
+  if(!attSelectedStudent.phone){
+    statusEl.className = 'status-line err';
+    statusEl.textContent = 'تم الحفظ، لكن لا يوجد رقم هاتف لولي الأمر — لا يمكن الإرسال';
+    return;
+  }
+
+  const resultText = document.getElementById('att-tier-result').textContent;
+  const countMatch = resultText.match(/(\d+)/);
+  const newCount = countMatch ? parseInt(countMatch[1], 10) : 1;
+  const message = buildAttendanceMessage(attSelectedStudent, attSelectedType, newCount, attSelectedTier, note);
+
+  attReadyToSend = { message, phone: attSelectedStudent.phone };
+  document.getElementById('att-whatsapp-btn').disabled = false;
+
+  statusEl.className = 'status-line';
+  statusEl.textContent = 'تم الحفظ — يمكنك الآن الإرسال لولي الأمر';
+});
+
+// ---------- attendance whatsapp send (only enabled right after a save) ----------
+document.getElementById('att-whatsapp-btn').addEventListener('click', ()=>{
+  if(!attReadyToSend) return;
+
+  const waLink = `https://wa.me/968${attReadyToSend.phone}?text=${encodeURIComponent(attReadyToSend.message)}`;
+  window.open(waLink, '_blank');
+
+  const statusEl = document.getElementById('att-send-status');
+  statusEl.className = 'status-line';
+  statusEl.textContent = 'تحقق من واتساب لإتمام الإرسال';
+
+  resetAttForm();
+});
+
+function resetAttForm(){
+  attSelectedStudent = null;
+  resetAttTierResult();
+  document.getElementById('att-note-input').value = '';
+  attTrigger.innerHTML = `<span>اختر طالبًا من القائمة</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>`;
+  attTrigger.classList.remove('filled');
+  updateAttSaveButtonState(); invalidateAttReadyToSend();
+}
+
+// =====================================================================
+// أخبار وإحصائيات — live feed + monthly stats.
+// Everyone sees ملاحظات data (auto-scoped to their own classes by the
+// same RLS rules as elsewhere). غياب/تأخر data only appears for admins —
+// not because of a client-side check alone, but because RLS already
+// returns nothing at all to a teacher querying attendance_records.
+// =====================================================================
+function startOfMonthISO(){
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+}
+
+function feedTimeLabel(iso){
+  const d = new Date(iso);
+  return d.toLocaleDateString('ar-OM', { day: 'numeric', month: 'numeric' }) + ' — ' +
+         d.toLocaleTimeString('ar-OM', { hour: 'numeric', minute: '2-digit' });
+}
+
+async function loadNewsAndStats(){
+  const statsEl = document.getElementById('news-stats');
+  const feedEl = document.getElementById('news-feed');
+  statsEl.innerHTML = '';
+  feedEl.innerHTML = '<div class="picker-loading">جارٍ التحميل…</div>';
+
+  const since = startOfMonthISO();
+
+  const { data: incidents, error: incErr } = await supabase
+    .from('incidents')
+    .select('id, created_at, note, students(full_name, classes(label_ar)), behavior_categories(type, severity, label_ar)')
+    .gte('created_at', since)
+    .order('created_at', { ascending: false })
+    .limit(100);
+
+  let attendance = [];
+  if(currentAppUser.role === 'admin'){
+    const { data: attData } = await supabase
+      .from('attendance_records')
+      .select('id, created_at, kind, students(full_name, classes(label_ar))')
+      .gte('created_at', since)
+      .order('created_at', { ascending: false })
+      .limit(100);
+    attendance = attData || [];
+  }
+
+  if(incErr){
+    feedEl.innerHTML = `<div class="picker-empty">تعذر تحميل السجل</div>`;
+    return;
+  }
+
+  const incidentList = incidents || [];
+  const positiveCount = incidentList.filter(i => i.behavior_categories && i.behavior_categories.type === 'positive').length;
+  const negativeCount = incidentList.length - positiveCount;
+  const lateCount = attendance.filter(a => a.kind === 'late').length;
+  const absentCount = attendance.filter(a => a.kind === 'absent').length;
+
+  // ---- stat cards ----
+  const cards = [
+    { num: incidentList.length, lbl: 'ملاحظات هذا الشهر' },
+    { num: positiveCount, lbl: 'إيجابية' },
+    { num: negativeCount, lbl: 'سلبية' },
+  ];
+  if(currentAppUser.role === 'admin'){
+    cards.push({ num: lateCount, lbl: 'حالات تأخر هذا الشهر' });
+    cards.push({ num: absentCount, lbl: 'حالات غياب هذا الشهر' });
+  }
+  statsEl.innerHTML = cards.map(c => `
+    <div class="stat-card"><div class="num">${c.num}</div><div class="lbl">${c.lbl}</div></div>
+  `).join('');
+
+  // ---- merged feed ----
+  const feedItems = [];
+  incidentList.forEach(i=>{
+    const cat = i.behavior_categories;
+    const isPositive = cat && cat.type === 'positive';
+    feedItems.push({
+      created_at: i.created_at,
+      icon: isPositive ? '✓' : '!',
+      iconBg: isPositive ? 'var(--pos-bg)' : 'var(--serious-bg)',
+      iconColor: isPositive ? 'var(--pos)' : 'var(--serious)',
+      title: i.students ? i.students.full_name : 'طالب',
+      sub: `${cat ? cat.label_ar : ''}${i.students && i.students.classes ? ' — ' + i.students.classes.label_ar : ''}`
+    });
+  });
+  attendance.forEach(a=>{
+    feedItems.push({
+      created_at: a.created_at,
+      icon: a.kind === 'late' ? '⏱' : '⦸',
+      iconBg: 'var(--minor-bg)',
+      iconColor: 'var(--minor)',
+      title: a.students ? a.students.full_name : 'طالب',
+      sub: `${a.kind === 'late' ? 'تأخر' : 'غياب'}${a.students && a.students.classes ? ' — ' + a.students.classes.label_ar : ''}`
+    });
+  });
+
+  feedItems.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+
+  if(feedItems.length === 0){
+    feedEl.innerHTML = `<div class="picker-empty">لا توجد سجلات هذا الشهر بعد</div>`;
+    return;
+  }
+
+  feedEl.innerHTML = feedItems.slice(0, 40).map(f => `
+    <div class="feed-item">
+      <div class="feed-icon" style="background:${f.iconBg};color:${f.iconColor};">${f.icon}</div>
+      <div class="feed-body">
+        <div class="feed-title">${f.title}</div>
+        <div class="feed-sub">${f.sub}</div>
+      </div>
+      <div class="feed-time">${feedTimeLabel(f.created_at)}</div>
+    </div>
+  `).join('');
 }
 
 // ---------- on load: resume session if already logged in ----------
