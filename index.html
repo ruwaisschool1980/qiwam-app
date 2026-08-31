@@ -409,6 +409,14 @@ function showToast(msg){
   setTimeout(()=> t.classList.remove('show'), 3200);
 }
 
+// wa.me and api.whatsapp.com do the exact same thing — some networks
+// (school WiFi content filters especially) block the "wa.me" domain
+// specifically while leaving api.whatsapp.com untouched, so this is the
+// more reliable one to use as the default.
+function buildWhatsAppLink(phone, text){
+  return `https://api.whatsapp.com/send?phone=968${phone}&text=${encodeURIComponent(text)}`;
+}
+
 function initials(name){
   const parts = name.trim().split(' ');
   return parts[0] ? parts[0][0] : '؟';
@@ -983,7 +991,7 @@ document.getElementById('send-btn').addEventListener('click', async ()=>{
     });
   }
 
-  const waLink = `https://wa.me/968${selectedStudent.phone}?text=${encodeURIComponent(message)}`;
+  const waLink = buildWhatsAppLink(selectedStudent.phone, message);
   window.open(waLink, '_blank');
 
   statusEl.className = 'status-line';
@@ -1320,7 +1328,7 @@ document.getElementById('att-save-btn').addEventListener('click', async ()=>{
 document.getElementById('att-whatsapp-btn').addEventListener('click', ()=>{
   if(!attReadyToSend) return;
 
-  const waLink = `https://wa.me/968${attReadyToSend.phone}?text=${encodeURIComponent(attReadyToSend.message)}`;
+  const waLink = buildWhatsAppLink(attReadyToSend.phone, attReadyToSend.message);
   window.open(waLink, '_blank');
 
   const statusEl = document.getElementById('att-send-status');
