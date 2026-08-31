@@ -44,9 +44,12 @@
 
   .content{padding:6px 16px 16px;}
 
-  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px;box-shadow:0 1px 2px rgba(15,61,62,0.04);}
   .card h2{font-size:13.5px;margin:0 0 3px;color:var(--teal-deep);}
   .card .hint{font-size:11px;color:var(--ink-soft);margin:0 0 12px;}
+
+  .two-col{display:block;}
+  .col-select, .col-compose{display:block;}
 
   .field{margin-bottom:14px;}
   .field label{display:block;font-size:11.5px;font-weight:600;margin-bottom:6px;}
@@ -68,6 +71,8 @@
   .welcome-name{font-family:'Almarai',sans-serif;font-weight:700;font-size:15px;color:var(--teal-deep);margin-bottom:14px;}
 
   .login-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px;}
+  .app-main-panel{display:none;flex:1;flex-direction:column;}
+  .app-main-panel.is-visible{display:flex;}
   .login-brand{text-align:center;margin-bottom:28px;}
   .login-brand .mark{width:56px;height:56px;border-radius:16px;background:var(--copper);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Almarai',sans-serif;font-weight:800;font-size:22px;margin:0 auto 12px;}
   .login-brand h1{font-size:19px;margin:0;color:var(--teal-deep);}
@@ -140,6 +145,18 @@
   .feed-sub{font-size:11px;color:var(--ink-soft);margin-top:2px;}
   .feed-time{font-size:10px;color:var(--ink-soft);white-space:nowrap;flex-shrink:0;}
 
+  .timeline-item{padding:12px 0;border-bottom:1px solid var(--line);}
+  .timeline-item:last-child{border-bottom:none;}
+  .timeline-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+  .timeline-cat{font-size:12px;font-weight:700;}
+  .timeline-date{font-size:10.5px;color:var(--ink-soft);}
+  .timeline-note{font-size:12px;color:var(--ink);margin-top:2px;}
+  .media-gallery{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+  .media-thumb{width:70px;height:70px;border-radius:8px;object-fit:cover;border:1px solid var(--line);cursor:pointer;}
+  .media-thumb-video{width:70px;height:70px;border-radius:8px;cursor:pointer;}
+  .media-audio{width:100%;margin-top:6px;}
+  .sf-empty{text-align:center;padding:24px 12px;color:var(--ink-soft);font-size:12.5px;}
+
   .toast{
     position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
     background:var(--teal-deep);color:#fff;padding:10px 18px;border-radius:999px;
@@ -150,9 +167,96 @@
   .status-line{font-size:11px;color:var(--ink-soft);text-align:center;margin-top:8px;}
   .status-line.err{color:var(--danger);}
 
-  nav.tabbar{position:sticky;bottom:0;display:flex;justify-content:space-around;align-items:center;padding:8px 6px 14px;background:var(--card);border-top:1px solid var(--line);z-index:10;}
-  .tab-item{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;color:var(--ink-soft);}
-  .tab-item.active{color:var(--teal);}
+  nav.tabbar{position:sticky;bottom:0;display:flex;justify-content:space-around;align-items:center;padding:8px 6px 14px;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -2px 8px rgba(15,61,62,0.05);z-index:10;}
+  .tab-item{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;color:var(--ink-soft);padding:4px 10px;border-radius:10px;cursor:pointer;transition:background .15s ease;}
+  .tab-item.active{color:var(--teal);background:var(--teal-mist);}
+/* =====================================================================
+   DESKTOP LAYOUT (wide screens only — phone layout above is untouched)
+   ===================================================================== */
+@media (min-width: 900px){
+  html,body{height:100%;}
+  body{padding:0;}
+  .app-shell{
+    max-width:none;
+    width:100%;
+    height:100vh;
+    box-shadow:none;
+  }
+
+  .app-main-panel.is-visible{
+    display:grid;
+    grid-template-columns: 220px 1fr;
+    height:100vh;
+    overflow:hidden;
+  }
+
+  nav.tabbar{
+    grid-column:1;
+    grid-row:1;
+    position:static;
+    flex-direction:column;
+    justify-content:flex-start;
+    align-items:stretch;
+    gap:6px;
+    height:100vh;
+    padding:28px 16px;
+    border-top:none;
+    border-left:1px solid var(--line);
+    box-shadow:none;
+    background:var(--teal-deep);
+  }
+  .tab-item{
+    flex-direction:row;
+    justify-content:flex-start;
+    gap:10px;
+    font-size:13px;
+    color:#B9C9C3;
+    padding:11px 14px;
+  }
+  .tab-item svg{flex-shrink:0;}
+  .tab-item.active{background:rgba(239,234,224,0.12);color:#fff;}
+  .tab-item:hover{background:rgba(239,234,224,0.08);}
+  #logout-btn{margin-top:auto;color:#9FB6AE;}
+
+  .main-pane{
+    grid-column:2;
+    grid-row:1;
+    display:flex;
+    flex-direction:column;
+    height:100vh;
+    overflow:hidden;
+  }
+  header{
+    padding:28px 40px 20px;
+    flex-shrink:0;
+  }
+  header h1{font-size:20px;}
+
+  .content{
+    flex:1;
+    overflow-y:auto;
+    padding:8px 40px 48px;
+  }
+  .content::-webkit-scrollbar{width:10px;}
+  .content::-webkit-scrollbar-track{background:transparent;}
+  .content::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px;}
+  .content::-webkit-scrollbar-thumb:hover{background:var(--ink-soft);}
+
+  .two-col{display:flex;align-items:flex-start;gap:24px;}
+  .col-select{flex:0 0 360px;}
+  .col-compose{flex:1;min-width:0;}
+
+  .card{padding:20px 22px;}
+  .card h2{font-size:15px;}
+
+  .stat-row{grid-template-columns:repeat(4,1fr);}
+
+  .login-wrap{
+    align-self:center;
+    width:100%;
+    max-width:400px;
+  }
+}
 </style>
 </head>
 <body>
@@ -190,7 +294,8 @@
     </div>
 
     <!-- ========== MAIN APP ========== -->
-    <div id="app-main" style="display:none; flex:1; display:none; flex-direction:column;">
+    <div id="app-main" class="app-main-panel">
+      <div class="main-pane">
       <header>
         <div>
           <h1>تسجيل ملاحظة</h1>
@@ -202,6 +307,8 @@
       <div class="content">
 
       <div id="screen-notes">
+      <div class="two-col">
+      <div class="col-select">
         <div class="card">
           <h2>الصف</h2>
           <p class="hint">اختر صف الطالب أولاً</p>
@@ -230,7 +337,9 @@
             </div>
           </div>
         </div>
+      </div>
 
+      <div class="col-compose">
         <div class="card">
           <h2>نوع الملاحظة</h2>
           <p class="hint">اختر التصنيف المناسب</p>
@@ -281,8 +390,12 @@
         </button>
         <div class="status-line" id="send-status"></div>
       </div>
+      </div>
+      </div>
 
       <div id="screen-attendance" style="display:none;">
+      <div class="two-col">
+      <div class="col-select">
         <div class="card">
           <h2>الصف</h2>
           <p class="hint">اختر صف الطالب أولاً</p>
@@ -321,7 +434,9 @@
           </div>
           <div id="att-tier-result" style="display:none;margin-top:12px;padding:10px 12px;border-radius:10px;background:var(--sand);border:1px solid var(--line);font-size:12px;"></div>
         </div>
+      </div>
 
+      <div class="col-compose">
         <div class="card">
           <h2>وصف مختصر (اختياري)</h2>
           <textarea class="note" id="att-note-input" placeholder="أي تفاصيل إضافية…"></textarea>
@@ -349,6 +464,8 @@
         </button>
         <div class="status-line" id="att-send-status"></div>
       </div>
+      </div>
+      </div>
 
       <div id="screen-news" style="display:none;">
         <div class="stat-row" id="news-stats"></div>
@@ -359,6 +476,50 @@
         </div>
       </div>
 
+      <div id="screen-studentfile" style="display:none;">
+      <div class="two-col">
+      <div class="col-select">
+        <div class="card">
+          <h2>الصف</h2>
+          <p class="hint">اختر صف الطالب أولاً</p>
+          <div class="field">
+            <div class="picker-trigger" id="sf-class-trigger">
+              <span>اختر الصف</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+            <div class="picker-panel" id="sf-class-panel">
+              <div class="picker-list" id="sf-class-list"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>الطالب</h2>
+          <p class="hint" id="sf-student-hint">اختر الصف أولًا لعرض طلابه</p>
+          <div class="field">
+            <div class="picker-trigger" id="sf-picker-trigger" style="opacity:.5;pointer-events:none;">
+              <span>اختر طالبًا من القائمة</span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+            <div class="picker-panel" id="sf-picker-panel">
+              <input class="picker-search" id="sf-picker-search" placeholder="ابحث بالاسم داخل الصف…">
+              <div class="picker-list" id="sf-picker-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-compose">
+        <div class="card" id="sf-history-card" style="display:none;">
+          <h2 id="sf-history-title">سجل الطالب</h2>
+          <p class="hint">جميع الملاحظات وحالات الغياب المسجلة</p>
+          <div id="sf-timeline"></div>
+        </div>
+      </div>
+      </div>
+      </div>
+
+      </div>
       </div>
 
       <nav class="tabbar">
@@ -372,7 +533,11 @@
         </div>
         <div class="tab-item" id="tab-news">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/></svg>
-          أخبار وإحصائيات
+          أخبار
+        </div>
+        <div class="tab-item" id="tab-studentfile">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          ملف الطالب
         </div>
         <div class="tab-item" id="logout-btn">تسجيل الخروج</div>
       </nav>
@@ -497,7 +662,7 @@ async function loadCurrentUserAndEnterApp(){
 
   document.getElementById('login-step1').style.display = 'none';
   document.getElementById('login-step2').style.display = 'none';
-  document.getElementById('app-main').style.display = 'flex';
+  document.getElementById('app-main').classList.add('is-visible');
   document.getElementById('header-avatar').textContent = initials(currentAppUser.full_name);
   document.getElementById('header-class-tag').textContent = `${SCHOOL_NAME} — ${currentAppUser.full_name}`;
 
@@ -516,8 +681,8 @@ async function loadCurrentUserAndEnterApp(){
 }
 
 // ---------- TAB SWITCHING ----------
-const ALL_SCREENS = ['screen-notes', 'screen-attendance', 'screen-news'];
-const ALL_TABS = ['tab-notes', 'tab-attendance', 'tab-news'];
+const ALL_SCREENS = ['screen-notes', 'screen-attendance', 'screen-news', 'screen-studentfile'];
+const ALL_TABS = ['tab-notes', 'tab-attendance', 'tab-news', 'tab-studentfile'];
 
 function switchTab(activeTab, activeScreen, title){
   ALL_TABS.forEach(id => document.getElementById(id).classList.toggle('active', id === activeTab));
@@ -537,8 +702,12 @@ document.getElementById('tab-attendance').addEventListener('click', async ()=>{
 });
 
 document.getElementById('tab-news').addEventListener('click', async ()=>{
-  switchTab('tab-news', 'screen-news', 'أخبار وإحصائيات');
+  switchTab('tab-news', 'screen-news', 'أخبار');
   await loadNewsAndStats();
+});
+
+document.getElementById('tab-studentfile').addEventListener('click', ()=>{
+  switchTab('tab-studentfile', 'screen-studentfile', 'ملف الطالب');
 });
 
 
@@ -571,7 +740,7 @@ document.getElementById('logout-btn').addEventListener('click', async ()=>{
   selectedClass = null;
   allClasses = [];
   classRoster = [];
-  document.getElementById('app-main').style.display = 'none';
+  document.getElementById('app-main').classList.remove('is-visible');
   document.getElementById('login-step1').style.display = 'flex';
   document.getElementById('employee-number-input').value = '';
   document.getElementById('password-input').value = '';
@@ -903,21 +1072,31 @@ document.getElementById('attach-audio-btn').addEventListener('click', async ()=>
 
 async function uploadPendingMedia(incidentId){
   for(const m of pendingMedia){
-    const path = `${incidentId}/${Date.now()}-${m.name}`;
-    const { error: uploadErr } = await supabase.storage
-      .from('incident-media')
-      .upload(path, m.blob);
+    try{
+      const path = `${incidentId}/${Date.now()}-${m.name}`;
+      const { error: uploadErr } = await supabase.storage
+        .from('incident-media')
+        .upload(path, m.blob);
 
-    if(uploadErr){
+      if(uploadErr){
+        showToast(`تعذر رفع مرفق: ${m.name}`);
+        continue;
+      }
+
+      const { error: mediaRowErr } = await supabase.from('media').insert({
+        incident_id: incidentId,
+        kind: m.kind,
+        storage_path: path
+      });
+      if(mediaRowErr){
+        showToast(`تعذر تسجيل مرفق: ${m.name}`);
+      }
+    }catch(err){
+      // a network hiccup on one attachment must never block the rest of
+      // the flow (and especially must never block sending the WhatsApp
+      // message, which matters far more than the attachment itself)
       showToast(`تعذر رفع مرفق: ${m.name}`);
-      continue;
     }
-
-    await supabase.from('media').insert({
-      incident_id: incidentId,
-      kind: m.kind,
-      storage_path: path
-    });
   }
 }
 
@@ -925,6 +1104,7 @@ async function uploadPendingMedia(incidentId){
 // ---------- SEND: insert incident + notification, open wa.me ----------
 document.getElementById('send-btn').addEventListener('click', async ()=>{
   const statusEl = document.getElementById('send-status');
+  const btn = document.getElementById('send-btn');
   statusEl.className = 'status-line';
   statusEl.textContent = '';
 
@@ -935,70 +1115,86 @@ document.getElementById('send-btn').addEventListener('click', async ()=>{
   }
 
   const note = document.getElementById('note-input').value.trim();
-  const btn = document.getElementById('send-btn');
   btn.disabled = true;
   statusEl.textContent = 'جارٍ الحفظ…';
 
-  const { data: incident, error: incidentErr } = await supabase
-    .from('incidents')
-    .insert({
-      student_id: selectedStudent.id,
-      category_id: selectedCategory.id,
-      recorded_by: currentAppUser.id,
-      note: note || null
-    })
-    .select()
-    .single();
+  try{
+    const { data: incident, error: incidentErr } = await supabase
+      .from('incidents')
+      .insert({
+        student_id: selectedStudent.id,
+        category_id: selectedCategory.id,
+        recorded_by: currentAppUser.id,
+        note: note || null
+      })
+      .select()
+      .single();
 
-  if(incidentErr){
-    statusEl.className = 'status-line err';
-    statusEl.textContent = 'تعذر حفظ الملاحظة — حاول مرة أخرى';
-    btn.disabled = false;
-    return;
-  }
+    if(incidentErr){
+      statusEl.className = 'status-line err';
+      statusEl.textContent = 'تعذر حفظ الملاحظة — حاول مرة أخرى';
+      btn.disabled = false;
+      return;
+    }
 
-  if(pendingMedia.length > 0){
-    statusEl.textContent = 'جارٍ رفع المرفقات…';
-    await uploadPendingMedia(incident.id);
-  }
+    if(pendingMedia.length > 0){
+      statusEl.textContent = 'جارٍ رفع المرفقات…';
+      await uploadPendingMedia(incident.id);
+    }
 
-  if(!selectedStudent.phone){
-    statusEl.className = 'status-line err';
-    statusEl.textContent = 'تم حفظ الملاحظة، لكن لا يوجد رقم هاتف لولي الأمر لإرسالها';
-    btn.disabled = false;
+    if(!selectedStudent.phone){
+      statusEl.className = 'status-line err';
+      statusEl.textContent = 'تم حفظ الملاحظة، لكن لا يوجد رقم هاتف لولي الأمر لإرسالها';
+      btn.disabled = false;
+      resetForm();
+      return;
+    }
+
+    // reuse the same builder that powers the live preview, so what gets sent
+    // always matches exactly what the teacher already saw on screen
+    const message = buildMessage(selectedStudent, selectedCategory, note);
+
+    // find the guardian row id (needed for the notifications FK) — best
+    // effort only, a failure here must not block the actual WhatsApp send
+    let guardianRow = null;
+    try{
+      const res = await supabase
+        .from('guardians')
+        .select('id')
+        .eq('student_id', selectedStudent.id)
+        .eq('is_primary', true)
+        .limit(1)
+        .single();
+      guardianRow = res.data;
+    }catch(err){ /* non-fatal, continue without a notification-log row */ }
+
+    if(guardianRow){
+      try{
+        await supabase.from('notifications').insert({
+          incident_id: incident.id,
+          guardian_id: guardianRow.id,
+          status: 'pending'
+        });
+      }catch(err){ /* non-fatal */ }
+    }
+
+    const waLink = buildWhatsAppLink(selectedStudent.phone, message);
+    window.open(waLink, '_blank');
+
+    statusEl.className = 'status-line';
+    statusEl.textContent = 'تم الحفظ — تحقق من واتساب لإتمام الإرسال';
+    showToast('تم حفظ الملاحظة');
     resetForm();
-    return;
+
+  }catch(err){
+    // last-resort safety net: never leave the button silently stuck —
+    // the record may already be saved even if something after that failed,
+    // so this is deliberately not framed as "nothing happened"
+    statusEl.className = 'status-line err';
+    statusEl.textContent = 'حدث خطأ غير متوقع — تحقق من السجل قبل إعادة المحاولة';
+  }finally{
+    btn.disabled = false;
   }
-
-  // reuse the same builder that powers the live preview, so what gets sent
-  // always matches exactly what the teacher already saw on screen
-  const message = buildMessage(selectedStudent, selectedCategory, note);
-
-  // find the guardian row id (needed for the notifications FK)
-  const { data: guardianRow } = await supabase
-    .from('guardians')
-    .select('id')
-    .eq('student_id', selectedStudent.id)
-    .eq('is_primary', true)
-    .limit(1)
-    .single();
-
-  if(guardianRow){
-    await supabase.from('notifications').insert({
-      incident_id: incident.id,
-      guardian_id: guardianRow.id,
-      status: 'pending'
-    });
-  }
-
-  const waLink = buildWhatsAppLink(selectedStudent.phone, message);
-  window.open(waLink, '_blank');
-
-  statusEl.className = 'status-line';
-  statusEl.textContent = 'تم الحفظ — تحقق من واتساب لإتمام الإرسال';
-  showToast('تم حفظ الملاحظة');
-  btn.disabled = false;
-  resetForm();
 });
 
 function resetForm(){
@@ -1271,6 +1467,7 @@ document.getElementById('att-note-input').addEventListener('input', ()=>{
 // ---------- attendance save (record only, no message sent yet) ----------
 document.getElementById('att-save-btn').addEventListener('click', async ()=>{
   const statusEl = document.getElementById('att-send-status');
+  const saveBtn = document.getElementById('att-save-btn');
   statusEl.className = 'status-line';
   statusEl.textContent = '';
 
@@ -1281,47 +1478,52 @@ document.getElementById('att-save-btn').addEventListener('click', async ()=>{
   }
 
   const note = document.getElementById('att-note-input').value.trim();
-  const saveBtn = document.getElementById('att-save-btn');
   saveBtn.disabled = true;
   statusEl.textContent = 'جارٍ الحفظ…';
 
-  const { error: recordErr } = await supabase
-    .from('attendance_records')
-    .insert({
-      student_id: attSelectedStudent.id,
-      recorded_by: currentAppUser.id,
-      kind: attSelectedType,
-      note: note || null
-    })
-    .select()
-    .single();
+  try{
+    const { error: recordErr } = await supabase
+      .from('attendance_records')
+      .insert({
+        student_id: attSelectedStudent.id,
+        recorded_by: currentAppUser.id,
+        kind: attSelectedType,
+        note: note || null
+      })
+      .select()
+      .single();
 
-  if(recordErr){
+    if(recordErr){
+      statusEl.className = 'status-line err';
+      statusEl.textContent = 'تعذر حفظ السجل — حاول مرة أخرى';
+      return;
+    }
+
+    showToast('تم حفظ السجل');
+
+    if(!attSelectedStudent.phone){
+      statusEl.className = 'status-line err';
+      statusEl.textContent = 'تم الحفظ، لكن لا يوجد رقم هاتف لولي الأمر — لا يمكن الإرسال';
+      return;
+    }
+
+    const resultText = document.getElementById('att-tier-result').textContent;
+    const countMatch = resultText.match(/(\d+)/);
+    const newCount = countMatch ? parseInt(countMatch[1], 10) : 1;
+    const message = buildAttendanceMessage(attSelectedStudent, attSelectedType, newCount, attSelectedTier, note);
+
+    attReadyToSend = { message, phone: attSelectedStudent.phone };
+    document.getElementById('att-whatsapp-btn').disabled = false;
+
+    statusEl.className = 'status-line';
+    statusEl.textContent = 'تم الحفظ — يمكنك الآن الإرسال لولي الأمر';
+
+  }catch(err){
     statusEl.className = 'status-line err';
-    statusEl.textContent = 'تعذر حفظ السجل — حاول مرة أخرى';
+    statusEl.textContent = 'حدث خطأ غير متوقع — تحقق من السجل قبل إعادة المحاولة';
+  }finally{
     saveBtn.disabled = false;
-    return;
   }
-
-  showToast('تم حفظ السجل');
-  saveBtn.disabled = false;
-
-  if(!attSelectedStudent.phone){
-    statusEl.className = 'status-line err';
-    statusEl.textContent = 'تم الحفظ، لكن لا يوجد رقم هاتف لولي الأمر — لا يمكن الإرسال';
-    return;
-  }
-
-  const resultText = document.getElementById('att-tier-result').textContent;
-  const countMatch = resultText.match(/(\d+)/);
-  const newCount = countMatch ? parseInt(countMatch[1], 10) : 1;
-  const message = buildAttendanceMessage(attSelectedStudent, attSelectedType, newCount, attSelectedTier, note);
-
-  attReadyToSend = { message, phone: attSelectedStudent.phone };
-  document.getElementById('att-whatsapp-btn').disabled = false;
-
-  statusEl.className = 'status-line';
-  statusEl.textContent = 'تم الحفظ — يمكنك الآن الإرسال لولي الأمر';
 });
 
 // ---------- attendance whatsapp send (only enabled right after a save) ----------
@@ -1458,6 +1660,213 @@ async function loadNewsAndStats(){
       <div class="feed-time">${feedTimeLabel(f.created_at)}</div>
     </div>
   `).join('');
+}
+
+// =====================================================================
+// ملف الطالب — full history for one student, with attached media shown
+// inline. Uses the same class-then-student pattern as الملاحظات/الغياب.
+// =====================================================================
+let sfSelectedClass = null;
+let sfSelectedStudent = null;
+let sfClassRoster = [];
+
+const sfClassTrigger = document.getElementById('sf-class-trigger');
+const sfClassPanel = document.getElementById('sf-class-panel');
+const sfClassList = document.getElementById('sf-class-list');
+
+sfClassTrigger.addEventListener('click', async ()=>{
+  sfClassPanel.classList.toggle('open');
+  if(sfClassPanel.classList.contains('open') && allClasses.length === 0){
+    await loadClasses(); // same class list used by الملاحظات
+  }
+  if(sfClassPanel.classList.contains('open')){
+    renderSfClassList();
+  }
+});
+
+function renderSfClassList(){
+  sfClassList.innerHTML = '';
+  allClasses.forEach(c=>{
+    const row = document.createElement('div');
+    row.className = 'picker-row';
+    row.innerHTML = `<div class="pname">${c.label_ar}</div>`;
+    row.addEventListener('click', ()=>{
+      sfSelectedClass = c;
+      sfClassTrigger.innerHTML = `<span class="chosen">${c.label_ar}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>`;
+      sfClassTrigger.classList.add('filled');
+      sfClassPanel.classList.remove('open');
+
+      sfSelectedStudent = null;
+      const sfTrigger = document.getElementById('sf-picker-trigger');
+      sfTrigger.innerHTML = `<span>اختر طالبًا من القائمة</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>`;
+      sfTrigger.classList.remove('filled');
+      sfTrigger.style.opacity = '1';
+      sfTrigger.style.pointerEvents = 'auto';
+      document.getElementById('sf-student-hint').textContent = `طلاب صف ${c.label_ar}`;
+      document.getElementById('sf-history-card').style.display = 'none';
+    });
+    sfClassList.appendChild(row);
+  });
+}
+
+const sfTrigger = document.getElementById('sf-picker-trigger');
+const sfPanel = document.getElementById('sf-picker-panel');
+const sfSearch = document.getElementById('sf-picker-search');
+const sfList = document.getElementById('sf-picker-list');
+
+sfTrigger.addEventListener('click', async ()=>{
+  if(!sfSelectedClass) return;
+  sfPanel.classList.toggle('open');
+  if(sfPanel.classList.contains('open')){
+    sfSearch.value = '';
+    sfSearch.focus();
+    sfList.innerHTML = '<div class="picker-loading">جارٍ التحميل…</div>';
+    const { data, error } = await supabase
+      .from('students')
+      .select('id, full_name, national_id')
+      .eq('class_id', sfSelectedClass.id)
+      .order('full_name');
+    if(error || !data){
+      sfClassRoster = [];
+      sfList.innerHTML = `<div class="picker-empty">تعذر تحميل طلاب هذا الصف</div>`;
+      return;
+    }
+    sfClassRoster = data;
+    renderSfStudentList(sfClassRoster);
+  }
+});
+
+sfSearch.addEventListener('input', ()=>{
+  const q = sfSearch.value.trim();
+  const filtered = q ? sfClassRoster.filter(s => s.full_name.includes(q)) : sfClassRoster;
+  renderSfStudentList(filtered);
+});
+
+function renderSfStudentList(students){
+  if(!students || students.length === 0){
+    sfList.innerHTML = `<div class="picker-empty">لا يوجد طالب بهذا الاسم في هذا الصف</div>`;
+    return;
+  }
+  sfList.innerHTML = '';
+  students.forEach(s=>{
+    const row = document.createElement('div');
+    row.className = 'picker-row';
+    row.innerHTML = `<div class="mini-avatar">${initials(s.full_name)}</div><div class="pname">${s.full_name}</div>`;
+    row.addEventListener('click', async ()=>{
+      sfSelectedStudent = s;
+      sfTrigger.innerHTML = `
+        <span class="chosen"><span class="mini-avatar">${initials(s.full_name)}</span>${s.full_name}</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+      `;
+      sfTrigger.classList.add('filled');
+      sfPanel.classList.remove('open');
+      await loadStudentTimeline(s);
+    });
+    sfList.appendChild(row);
+  });
+}
+
+async function loadStudentTimeline(student){
+  const card = document.getElementById('sf-history-card');
+  const titleEl = document.getElementById('sf-history-title');
+  const timelineEl = document.getElementById('sf-timeline');
+  card.style.display = 'block';
+  titleEl.textContent = `سجل ${student.full_name}`;
+  timelineEl.innerHTML = '<div class="picker-loading">جارٍ التحميل…</div>';
+
+  const { data: incidents, error: incErr } = await supabase
+    .from('incidents')
+    .select('id, created_at, note, behavior_categories(type, severity, label_ar), media(id, kind, storage_path)')
+    .eq('student_id', student.id)
+    .order('created_at', { ascending: false });
+
+  let attendance = [];
+  if(currentAppUser.role === 'admin'){
+    const { data: attData } = await supabase
+      .from('attendance_records')
+      .select('id, created_at, kind, note')
+      .eq('student_id', student.id)
+      .order('created_at', { ascending: false });
+    attendance = attData || [];
+  }
+
+  if(incErr){
+    timelineEl.innerHTML = `<div class="sf-empty">تعذر تحميل سجل الطالب</div>`;
+    return;
+  }
+
+  const items = [];
+  (incidents || []).forEach(i=>{
+    const cat = i.behavior_categories;
+    const tagClass = cat ? (cat.type === 'positive' ? 'pos' : cat.severity) : 'minor';
+    items.push({
+      created_at: i.created_at,
+      catLabel: cat ? cat.label_ar : 'ملاحظة',
+      tagClass,
+      note: i.note,
+      media: i.media || []
+    });
+  });
+  attendance.forEach(a=>{
+    items.push({
+      created_at: a.created_at,
+      catLabel: a.kind === 'late' ? 'تأخر' : 'غياب يوم كامل',
+      tagClass: 'minor',
+      note: a.note,
+      media: []
+    });
+  });
+  items.sort((a,b) => new Date(b.created_at) - new Date(a.created_at));
+
+  if(items.length === 0){
+    timelineEl.innerHTML = `<div class="sf-empty">لا توجد سجلات لهذا الطالب بعد</div>`;
+    return;
+  }
+
+  timelineEl.innerHTML = items.map((it, idx) => `
+    <div class="timeline-item">
+      <div class="timeline-head">
+        <span class="timeline-cat tag ${it.tagClass}">${it.catLabel}</span>
+        <span class="timeline-date">${feedTimeLabel(it.created_at)}</span>
+      </div>
+      ${it.note ? `<div class="timeline-note">${it.note}</div>` : ''}
+      <div class="media-gallery" id="sf-media-${idx}"></div>
+    </div>
+  `).join('');
+
+  // fetch signed URLs for any attached media (private bucket — needs a
+  // temporary signed link, a plain public URL won't work)
+  items.forEach(async (it, idx) => {
+    if(!it.media || it.media.length === 0) return;
+    const galleryEl = document.getElementById(`sf-media-${idx}`);
+    for(const m of it.media){
+      const { data: signed, error: signErr } = await supabase.storage
+        .from('incident-media')
+        .createSignedUrl(m.storage_path, 3600);
+      if(signErr || !signed) continue;
+
+      if(m.kind === 'image'){
+        const img = document.createElement('img');
+        img.className = 'media-thumb';
+        img.src = signed.signedUrl;
+        img.addEventListener('click', ()=> window.open(signed.signedUrl, '_blank'));
+        galleryEl.appendChild(img);
+      } else if(m.kind === 'video'){
+        const vid = document.createElement('video');
+        vid.className = 'media-thumb-video';
+        vid.src = signed.signedUrl;
+        vid.controls = true;
+        galleryEl.appendChild(vid);
+      } else if(m.kind === 'audio'){
+        const aud = document.createElement('audio');
+        aud.className = 'media-audio';
+        aud.src = signed.signedUrl;
+        aud.controls = true;
+        galleryEl.appendChild(aud);
+      }
+    }
+  });
 }
 
 // ---------- on load: resume session if already logged in ----------
