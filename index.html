@@ -70,6 +70,26 @@
   .error-msg{color:var(--danger);font-size:11.5px;margin-top:6px;}
   .welcome-name{font-family:'Almarai',sans-serif;font-weight:700;font-size:15px;color:var(--teal-deep);margin-bottom:14px;}
 
+  /* name confirmation, under the school line and above the card —
+     same face and size as the قِوام wordmark.
+     The slot keeps its height when empty so the card never jumps. */
+  .lookup-name{
+    margin-top:10px;min-height:26px;
+    font-family:'Almarai', sans-serif;font-weight:700;font-size:19px;
+    color:var(--copper);
+    display:flex;align-items:center;justify-content:center;
+    text-align:center;line-height:1.5;
+  }
+  /* transient states stay small — only the confirmed name gets the display size */
+  .lookup-name.searching,
+  .lookup-name.err{
+    font-family:'IBM Plex Sans Arabic', sans-serif;font-weight:400;font-size:11.5px;line-height:1.6;
+  }
+  .lookup-name.searching{color:var(--ink-soft);}
+  .lookup-name.err{color:var(--danger);}
+  .lookup-name.empty{visibility:hidden;}
+  .pw-rule{font-size:10.5px;color:var(--ink-soft);margin:-6px 0 12px;}
+
   .login-wrap{flex:1;display:flex;flex-direction:column;justify-content:center;padding:20px;}
   .app-main-panel{display:none;flex:1;flex-direction:column;}
   .app-main-panel.is-visible{display:flex;}
@@ -263,34 +283,56 @@
 
 <div class="app-shell">
 
-    <!-- ========== LOGIN: STEP 1 — EMPLOYEE NUMBER ========== -->
+    <!-- ========== LOGIN — ONE PAGE: NUMBER + PASSWORD ========== -->
     <div id="login-step1" class="login-wrap">
       <div class="login-brand">
         <div class="mark">قم</div>
         <h1>قِوام</h1>
         <p>مدرسة الرويس للبنين</p>
+        <!-- filled automatically once the number matches a staff record -->
+        <div class="lookup-name empty" id="lookup-name">&nbsp;</div>
       </div>
-      <div class="field">
-        <label>الرقم الوظيفي</label>
-        <input type="text" id="employee-number-input" placeholder="أدخل رقم ملفك الوظيفي" inputmode="numeric">
-      </div>
-      <button class="btn" id="continue-btn">متابعة</button>
-      <div class="status-line err" id="step1-error" style="display:none;"></div>
-    </div>
-
-    <!-- ========== LOGIN: STEP 2 — CONFIRM NAME + PASSWORD ========== -->
-    <div id="login-step2" class="login-wrap" style="display:none;">
       <div class="card">
-        <p class="hint" style="margin-bottom:4px;">أهلاً بك</p>
-        <div class="welcome-name" id="welcome-name">—</div>
+        <div class="field">
+          <label>الرقم الوظيفي</label>
+          <input type="text" id="employee-number-input" placeholder="أدخل رقم ملفك الوظيفي" inputmode="numeric" autocomplete="username">
+        </div>
         <div class="field">
           <label>كلمة المرور</label>
-          <input type="password" id="password-input" placeholder="••••••••">
+          <input type="password" id="password-input" placeholder="••••••••" autocomplete="current-password">
         </div>
         <button class="btn" id="login-btn">تسجيل الدخول</button>
-        <div class="status-line err" id="step2-error" style="display:none;"></div>
+        <div class="status-line err" id="login-error" style="display:none;"></div>
       </div>
-      <button class="btn ghost" id="back-btn">ليس أنت؟ رجوع</button>
+    </div>
+
+    <!-- ========== PASSWORD SCREEN (forced first-login set + voluntary change) ========== -->
+    <div id="screen-password" class="login-wrap" style="display:none;">
+      <div class="login-brand">
+        <div class="mark">قم</div>
+        <h1>قِوام</h1>
+      </div>
+      <div class="card">
+        <h2 id="pw-title">تغيير كلمة المرور</h2>
+        <p class="hint" id="pw-hint">أدخل كلمة المرور الجديدة</p>
+        <div class="field" id="pw-current-field" style="display:none;">
+          <label>كلمة المرور الحالية</label>
+          <input type="password" id="pw-current" placeholder="••••••••" autocomplete="current-password">
+        </div>
+        <div class="field">
+          <label>كلمة المرور الجديدة</label>
+          <input type="password" id="pw-new" placeholder="••••••••" autocomplete="new-password">
+        </div>
+        <p class="pw-rule">٦ أحرف أو أرقام على الأقل</p>
+        <div class="field">
+          <label>تأكيد كلمة المرور الجديدة</label>
+          <input type="password" id="pw-confirm" placeholder="••••••••" autocomplete="new-password">
+        </div>
+        <button class="btn" id="pw-save-btn">حفظ كلمة المرور</button>
+        <div class="status-line err" id="pw-error" style="display:none;"></div>
+      </div>
+      <button class="btn ghost" id="pw-cancel-btn" style="display:none;">إلغاء</button>
+      <button class="btn ghost" id="pw-logout-btn" style="display:none;">تسجيل الخروج</button>
     </div>
 
     <!-- ========== MAIN APP ========== -->
@@ -539,6 +581,10 @@
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           ملف الطالب
         </div>
+        <div class="tab-item" id="tab-password">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 2l-2 2m-7.6 7.6a5 5 0 1 1-7.1 7.1 5 5 0 0 1 7.1-7.1Zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3"/></svg>
+          كلمة المرور
+        </div>
         <div class="tab-item" id="logout-btn">تسجيل الخروج</div>
       </nav>
     </div>
@@ -587,70 +633,203 @@ function initials(name){
   return parts[0] ? parts[0][0] : '؟';
 }
 
-// ---------- LOGIN STEP 1: look up name by employee number ----------
-document.getElementById('continue-btn').addEventListener('click', async ()=>{
-  const errEl = document.getElementById('step1-error');
-  errEl.style.display = 'none';
-  const val = document.getElementById('employee-number-input').value.trim();
-  if(!val){
-    errEl.textContent = 'أدخل الرقم الوظيفي أولاً';
-    errEl.style.display = 'block';
-    return;
-  }
-  const btn = document.getElementById('continue-btn');
-  btn.disabled = true; btn.textContent = 'جارٍ البحث…';
+// ---------- LOGIN: live name lookup under the employee-number field ----------
+// Purely a confirmation aid — it never gates the login button, so a lookup
+// failure (offline, RPC hiccup) can't lock anyone out of the app.
+const empInput = document.getElementById('employee-number-input');
+const lookupEl = document.getElementById('lookup-name');
+let lookupTimer = null;
+let lastLookedUp = null;
 
+function setLookup(text, cls){
+  // the slot always occupies its space — hidden, not removed — so showing the
+  // name never pushes the card (and the password field) down under the cursor
+  lookupEl.className = 'lookup-name' + (text ? '' : ' empty') + (cls ? ' ' + cls : '');
+  lookupEl.textContent = text || ' ';
+}
+
+async function lookupEmployeeName(){
+  const val = empInput.value.trim();
+  if(val === lastLookedUp) return;
+  lastLookedUp = val;
+  if(val.length < 3){ setLookup(''); return; }
+
+  setLookup('جارٍ التحقق…', 'searching');
   const { data, error } = await supabase.rpc('lookup_employee_name', { p_employee_file_number: val });
 
-  btn.disabled = false; btn.textContent = 'متابعة';
+  // the field may have changed while the request was in flight
+  if(empInput.value.trim() !== val) return;
 
   if(error || !data){
-    errEl.textContent = 'لم يتم العثور على هذا الرقم الوظيفي';
+    setLookup('لم يتم العثور على هذا الرقم الوظيفي', 'err');
+    return;
+  }
+  setLookup(data);
+}
+
+empInput.addEventListener('input', ()=>{
+  clearTimeout(lookupTimer);
+  setLookup('');
+  lastLookedUp = null;
+  lookupTimer = setTimeout(lookupEmployeeName, 550);
+});
+empInput.addEventListener('blur', ()=>{
+  clearTimeout(lookupTimer);
+  lookupEmployeeName();
+});
+empInput.addEventListener('keydown', e => { if(e.key === 'Enter') document.getElementById('password-input').focus(); });
+document.getElementById('password-input').addEventListener('keydown', e => { if(e.key === 'Enter') doLogin(); });
+
+// ---------- LOGIN: sign in with employee number + password ----------
+document.getElementById('login-btn').addEventListener('click', doLogin);
+
+async function doLogin(){
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+  const number = empInput.value.trim();
+  const password = document.getElementById('password-input').value;
+
+  if(!number){
+    errEl.textContent = 'أدخل الرقم الوظيفي';
     errEl.style.display = 'block';
     return;
   }
-
-  pendingEmployeeNumber = val;
-  document.getElementById('welcome-name').textContent = data;
-  document.getElementById('login-step1').style.display = 'none';
-  document.getElementById('login-step2').style.display = 'flex';
-  document.getElementById('password-input').focus();
-});
-
-document.getElementById('back-btn').addEventListener('click', ()=>{
-  pendingEmployeeNumber = null;
-  document.getElementById('password-input').value = '';
-  document.getElementById('step2-error').style.display = 'none';
-  document.getElementById('login-step2').style.display = 'none';
-  document.getElementById('login-step1').style.display = 'flex';
-});
-
-// ---------- LOGIN STEP 2: real password sign-in ----------
-document.getElementById('login-btn').addEventListener('click', async ()=>{
-  const errEl = document.getElementById('step2-error');
-  errEl.style.display = 'none';
-  const password = document.getElementById('password-input').value;
   if(!password){
     errEl.textContent = 'أدخل كلمة المرور';
     errEl.style.display = 'block';
     return;
   }
+
   const btn = document.getElementById('login-btn');
   btn.disabled = true; btn.textContent = 'جارٍ الدخول…';
 
-  const email = `${pendingEmployeeNumber}@${EMAIL_DOMAIN}`;
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+  pendingEmployeeNumber = number;
+  const email = `${number}@${EMAIL_DOMAIN}`;
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   btn.disabled = false; btn.textContent = 'تسجيل الدخول';
 
   if(error){
-    errEl.textContent = 'كلمة المرور غير صحيحة';
+    errEl.textContent = 'الرقم الوظيفي أو كلمة المرور غير صحيحة';
     errEl.style.display = 'block';
     return;
   }
 
-  await loadCurrentUserAndEnterApp();
+  await afterSignIn();
+}
+
+// ---------- after any successful sign-in ----------
+// Staff created by the admin start on a shared default password. The flag
+// pw_set lives in Supabase Auth user_metadata, so no schema change is needed:
+// until it is true, the app refuses to open and asks for a new password.
+async function afterSignIn(){
+  const { data: { user } } = await supabase.auth.getUser();
+  if(!user){
+    showToast('انتهت الجلسة، سجّل الدخول من جديد');
+    return;
+  }
+  if(user.user_metadata && user.user_metadata.pw_set === true){
+    await loadCurrentUserAndEnterApp();
+  } else {
+    showPasswordScreen(true);
+  }
+}
+
+// ---------- PASSWORD SCREEN ----------
+let pwForced = false;
+
+function showPasswordScreen(forced){
+  pwForced = forced;
+  document.getElementById('app-main').classList.remove('is-visible');
+  document.getElementById('login-step1').style.display = 'none';
+  document.getElementById('screen-password').style.display = 'flex';
+
+  document.getElementById('pw-title').textContent = forced ? 'تعيين كلمة مرور جديدة' : 'تغيير كلمة المرور';
+  document.getElementById('pw-hint').textContent = forced
+    ? 'هذه أول مرة تدخل فيها — اختر كلمة مرور خاصة بك لا يعرفها أحد غيرك.'
+    : 'أدخل كلمة المرور الحالية ثم الجديدة.';
+  document.getElementById('pw-current-field').style.display = forced ? 'none' : 'block';
+  document.getElementById('pw-cancel-btn').style.display = forced ? 'none' : 'flex';
+  document.getElementById('pw-logout-btn').style.display = forced ? 'flex' : 'none';
+
+  ['pw-current','pw-new','pw-confirm'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('pw-error').style.display = 'none';
+  (forced ? document.getElementById('pw-new') : document.getElementById('pw-current')).focus();
+}
+
+document.getElementById('tab-password').addEventListener('click', ()=> showPasswordScreen(false));
+
+document.getElementById('pw-cancel-btn').addEventListener('click', ()=>{
+  document.getElementById('screen-password').style.display = 'none';
+  document.getElementById('app-main').classList.add('is-visible');
 });
+
+document.getElementById('pw-logout-btn').addEventListener('click', ()=> doLogout());
+
+['pw-current','pw-new','pw-confirm'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown', e => { if(e.key === 'Enter') savePassword(); });
+});
+
+document.getElementById('pw-save-btn').addEventListener('click', savePassword);
+
+async function savePassword(){
+  const errEl = document.getElementById('pw-error');
+  errEl.style.display = 'none';
+  const current = document.getElementById('pw-current').value;
+  const next    = document.getElementById('pw-new').value;
+  const confirm = document.getElementById('pw-confirm').value;
+
+  const fail = msg => { errEl.textContent = msg; errEl.style.display = 'block'; };
+
+  if(!pwForced && !current) return fail('أدخل كلمة المرور الحالية');
+  if(next.length < 6)       return fail('كلمة المرور يجب أن تكون ٦ أحرف أو أرقام على الأقل');
+  if(next !== confirm)      return fail('كلمتا المرور غير متطابقتين');
+
+  const btn = document.getElementById('pw-save-btn');
+  btn.disabled = true; btn.textContent = 'جارٍ الحفظ…';
+
+  const { data: { user } } = await supabase.auth.getUser();
+  if(!user){
+    btn.disabled = false; btn.textContent = 'حفظ كلمة المرور';
+    return fail('انتهت الجلسة، سجّل الدخول من جديد');
+  }
+
+  // voluntary change: prove the current password before replacing it
+  if(!pwForced){
+    const check = await supabase.auth.signInWithPassword({ email: user.email, password: current });
+    if(check.error){
+      btn.disabled = false; btn.textContent = 'حفظ كلمة المرور';
+      return fail('كلمة المرور الحالية غير صحيحة');
+    }
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    password: next,
+    data: { pw_set: true }
+  });
+
+  btn.disabled = false; btn.textContent = 'حفظ كلمة المرور';
+
+  if(error){
+    const m = (error.message || '').toLowerCase();
+    if(m.includes('different from the old') || m.includes('should be different')){
+      return fail('اختر كلمة مرور مختلفة عن الحالية');
+    }
+    if(m.includes('at least') || m.includes('length')){
+      return fail('كلمة المرور قصيرة جداً');
+    }
+    return fail('تعذر حفظ كلمة المرور، حاول مرة أخرى');
+  }
+
+  document.getElementById('screen-password').style.display = 'none';
+  showToast('تم تغيير كلمة المرور');
+
+  if(pwForced){
+    await loadCurrentUserAndEnterApp();
+  } else {
+    document.getElementById('app-main').classList.add('is-visible');
+  }
+}
 
 async function loadCurrentUserAndEnterApp(){
   const { data, error } = await supabase.rpc('current_app_user');
@@ -661,7 +840,7 @@ async function loadCurrentUserAndEnterApp(){
   currentAppUser = Array.isArray(data) ? data[0] : data;
 
   document.getElementById('login-step1').style.display = 'none';
-  document.getElementById('login-step2').style.display = 'none';
+  document.getElementById('screen-password').style.display = 'none';
   document.getElementById('app-main').classList.add('is-visible');
   document.getElementById('header-avatar').textContent = initials(currentAppUser.full_name);
   document.getElementById('header-class-tag').textContent = `${SCHOOL_NAME} — ${currentAppUser.full_name}`;
@@ -732,7 +911,9 @@ function isClassVisible(classId){
 }
 
 // ---------- LOGOUT ----------
-document.getElementById('logout-btn').addEventListener('click', async ()=>{
+document.getElementById('logout-btn').addEventListener('click', ()=> doLogout());
+
+async function doLogout(){
   await supabase.auth.signOut();
   currentAppUser = null;
   selectedStudent = null;
@@ -741,10 +922,14 @@ document.getElementById('logout-btn').addEventListener('click', async ()=>{
   allClasses = [];
   classRoster = [];
   document.getElementById('app-main').classList.remove('is-visible');
+  document.getElementById('screen-password').style.display = 'none';
   document.getElementById('login-step1').style.display = 'flex';
   document.getElementById('employee-number-input').value = '';
   document.getElementById('password-input').value = '';
-});
+  document.getElementById('login-error').style.display = 'none';
+  lastLookedUp = null;
+  setLookup('');
+}
 
 // ---------- CLASS PICKER (loaded once after login) ----------
 const classTrigger = document.getElementById('class-trigger');
@@ -1873,7 +2058,7 @@ async function loadStudentTimeline(student){
 (async ()=>{
   const { data: { session } } = await supabase.auth.getSession();
   if(session){
-    await loadCurrentUserAndEnterApp();
+    await afterSignIn();
   }
 })();
 </script>
