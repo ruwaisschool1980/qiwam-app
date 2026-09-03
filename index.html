@@ -207,6 +207,13 @@
   .sum-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:6px;}
   .sum-chip{border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:10.5px;background:var(--sand);}
   .sum-chip b{display:block;font-family:'Almarai',sans-serif;font-size:15px;font-weight:800;color:var(--teal-deep);}
+  /* on a phone the wide tables scroll sideways instead of crushing every
+     column to two characters; on paper they lay out in full */
+  .rep-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  @media (max-width:700px){
+    .rep-scroll table.rep{min-width:600px;}
+    .rep-scroll{margin-left:-4px;margin-right:-4px;}
+  }
   table.rep{width:100%;border-collapse:collapse;font-size:10.5px;}
   table.rep th{background:var(--sand-deep);border:1px solid #C9C0AA;padding:5px 6px;text-align:right;font-weight:600;font-size:10px;}
   table.rep td{border:1px solid #D8D1BE;padding:5px 6px;vertical-align:top;}
@@ -234,6 +241,8 @@
     #screen-notes, #screen-attendance, #screen-news, #screen-studentfile{display:none !important;}
     #screen-reports{display:block !important;}
     .sheet{border:none;border-radius:0;padding:0;}
+    .rep-scroll{overflow:visible !important;margin:0 !important;}
+    .rep-scroll table.rep{min-width:0 !important;}
     /* keep the severity tags readable on paper */
     *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
     table.rep{font-size:9.5px;}
@@ -2283,7 +2292,15 @@ document.getElementById('rep-build').addEventListener('click', async ()=>{
     }
 
     const html = await buildReport(type, cid, sid, range);
-    document.getElementById('report-sheet').innerHTML = html;
+    const sheetEl = document.getElementById('report-sheet');
+    sheetEl.innerHTML = html;
+    // give every table its own sideways-scrolling frame (phones); print unwraps it
+    sheetEl.querySelectorAll('table.rep').forEach(t=>{
+      const w = document.createElement('div');
+      w.className = 'rep-scroll';
+      t.parentNode.insertBefore(w, t);
+      w.appendChild(t);
+    });
     document.getElementById('rep-print-bar').style.display = 'block';
     document.getElementById('report-sheet').scrollIntoView({ behavior: 'smooth', block: 'start' });
   }catch(err){
