@@ -187,6 +187,61 @@
   .status-line{font-size:11px;color:var(--ink-soft);text-align:center;margin-top:8px;}
   .status-line.err{color:var(--danger);}
 
+  /* =====================================================================
+     REPORTS — on screen it is a normal card; on paper it is an A4 sheet
+     ===================================================================== */
+  .rep-controls .row2{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+  .rep-select{
+    width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+    font-family:inherit;font-size:13px;background:var(--sand);color:var(--ink);
+  }
+  .sheet{background:#fff;border:1px solid var(--line);border-radius:12px;padding:20px 18px;}
+  .sheet-head{text-align:center;border-bottom:2px solid var(--teal-deep);padding-bottom:11px;margin-bottom:14px;}
+  .sheet-head .ministry{font-size:10.5px;color:var(--ink-soft);line-height:1.9;}
+  .sheet-head .school{font-family:'Almarai',sans-serif;font-weight:700;font-size:14px;color:var(--teal-deep);margin-top:3px;}
+  .sheet-head .rtitle{font-family:'Almarai',sans-serif;font-weight:800;font-size:16px;color:var(--ink);margin-top:9px;}
+  .sheet-head .period{font-size:10.5px;color:var(--ink-soft);margin-top:4px;}
+  .sheet-meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:11px;margin-bottom:12px;}
+  .sheet-meta b{font-weight:600;}
+  .sheet h3{font-family:'Almarai',sans-serif;font-size:12.5px;color:var(--teal-deep);margin:16px 0 7px;}
+  .sum-row{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:6px;}
+  .sum-chip{border:1px solid var(--line);border-radius:8px;padding:6px 10px;font-size:10.5px;background:var(--sand);}
+  .sum-chip b{display:block;font-family:'Almarai',sans-serif;font-size:15px;font-weight:800;color:var(--teal-deep);}
+  table.rep{width:100%;border-collapse:collapse;font-size:10.5px;}
+  table.rep th{background:var(--sand-deep);border:1px solid #C9C0AA;padding:5px 6px;text-align:right;font-weight:600;font-size:10px;}
+  table.rep td{border:1px solid #D8D1BE;padding:5px 6px;vertical-align:top;}
+  table.rep td.c{text-align:center;}
+  table.rep tr.total td{background:var(--sand-deep);font-weight:700;}
+  .sev{display:inline-block;font-size:9.5px;font-weight:700;padding:1px 6px;border-radius:999px;white-space:nowrap;}
+  .sev.pos{background:var(--pos-bg);color:var(--pos);}
+  .sev.minor{background:var(--minor-bg);color:var(--minor);}
+  .sev.moderate{background:var(--moderate-bg);color:var(--moderate);}
+  .sev.serious{background:var(--serious-bg);color:var(--serious);}
+  .sign{display:flex;justify-content:space-between;gap:24px;margin-top:34px;font-size:11px;}
+  .sign div{flex:1;text-align:center;}
+  .sign .line{margin-top:34px;border-top:1px solid var(--ink-soft);padding-top:5px;color:var(--ink-soft);font-size:10px;}
+  .sheet-foot{margin-top:16px;border-top:1px solid var(--line);padding-top:7px;font-size:9.5px;color:var(--ink-soft);display:flex;justify-content:space-between;gap:10px;}
+  .rep-empty{padding:26px;text-align:center;color:var(--ink-soft);font-size:12px;}
+
+  @media print{
+    @page{ size:A4; margin:13mm 11mm; }
+    html,body{background:#fff !important;}
+    .app-shell{max-width:none !important;box-shadow:none !important;background:#fff !important;}
+    header, nav.tabbar, .toast, .no-print{display:none !important;}
+    .app-main-panel.is-visible{display:block !important;}
+    .main-pane{display:block !important;height:auto !important;overflow:visible !important;}
+    .content{padding:0 !important;}
+    #screen-notes, #screen-attendance, #screen-news, #screen-studentfile{display:none !important;}
+    #screen-reports{display:block !important;}
+    .sheet{border:none;border-radius:0;padding:0;}
+    /* keep the severity tags readable on paper */
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    table.rep{font-size:9.5px;}
+    thead{display:table-header-group;}
+    tr{page-break-inside:avoid;}
+    .sheet h3{page-break-after:avoid;}
+  }
+
   nav.tabbar{position:sticky;bottom:0;display:flex;justify-content:space-around;align-items:center;padding:8px 6px 14px;background:var(--card);border-top:1px solid var(--line);box-shadow:0 -2px 8px rgba(15,61,62,0.05);z-index:10;}
   .tab-item{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;color:var(--ink-soft);padding:4px 10px;border-radius:10px;cursor:pointer;transition:background .15s ease;}
   .tab-item.active{color:var(--teal);background:var(--teal-mist);}
@@ -561,6 +616,50 @@
       </div>
       </div>
 
+      <!-- ========== REPORTS (admin only) ========== -->
+      <div id="screen-reports" style="display:none;">
+        <div class="card rep-controls no-print">
+          <h2>إنشاء تقرير</h2>
+          <p class="hint">اختر نوع التقرير والفترة ثم اطبع</p>
+          <div class="field">
+            <label>نوع التقرير</label>
+            <select id="rep-type" class="rep-select">
+              <option value="student">سجل طالب سلوكي</option>
+              <option value="class">تقرير صف</option>
+              <option value="school">ملخص المدرسة</option>
+              <option value="followup">قائمة المتابعة</option>
+            </select>
+          </div>
+          <div class="field" id="rep-class-field">
+            <label>الصف</label>
+            <select id="rep-class" class="rep-select"></select>
+          </div>
+          <div class="field" id="rep-student-field">
+            <label>الطالب</label>
+            <select id="rep-student" class="rep-select"><option value="">— اختر الصف أولاً —</option></select>
+          </div>
+          <div class="row2">
+            <div class="field">
+              <label>من تاريخ</label>
+              <input type="date" id="rep-from" class="rep-select">
+            </div>
+            <div class="field">
+              <label>إلى تاريخ</label>
+              <input type="date" id="rep-to" class="rep-select">
+            </div>
+          </div>
+          <button class="btn" id="rep-build">إنشاء التقرير</button>
+          <div class="status-line err" id="rep-error" style="display:none;"></div>
+        </div>
+
+        <div class="card no-print" id="rep-print-bar" style="display:none;">
+          <button class="btn" id="rep-print">طباعة / حفظ PDF</button>
+          <p class="hint" style="margin:9px 0 0;">في نافذة الطباعة اختر A4 وفعّل «الرسوم الخلفية» لتظهر ألوان الدرجات.</p>
+        </div>
+
+        <div id="report-sheet"></div>
+      </div>
+
       </div>
       </div>
 
@@ -580,6 +679,10 @@
         <div class="tab-item" id="tab-studentfile">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           ملف الطالب
+        </div>
+        <div class="tab-item" id="tab-reports" style="display:none;">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 9V2h12v7"/><rect x="6" y="14" width="12" height="8"/><path d="M6 18H4a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-2"/></svg>
+          التقارير
         </div>
         <div class="tab-item" id="tab-password">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 2l-2 2m-7.6 7.6a5 5 0 1 1-7.1 7.1 5 5 0 0 1 7.1-7.1Zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3"/></svg>
@@ -848,6 +951,7 @@ async function loadCurrentUserAndEnterApp(){
   // الغياب is admin-only — teachers never even see the tab
   if(currentAppUser.role === 'admin'){
     document.getElementById('tab-attendance').style.display = 'flex';
+    document.getElementById('tab-reports').style.display = 'flex';   // printable reports
   }
 
   // photo/video/voice attachments — restricted to one named user per the principal
@@ -860,8 +964,8 @@ async function loadCurrentUserAndEnterApp(){
 }
 
 // ---------- TAB SWITCHING ----------
-const ALL_SCREENS = ['screen-notes', 'screen-attendance', 'screen-news', 'screen-studentfile'];
-const ALL_TABS = ['tab-notes', 'tab-attendance', 'tab-news', 'tab-studentfile'];
+const ALL_SCREENS = ['screen-notes', 'screen-attendance', 'screen-news', 'screen-studentfile', 'screen-reports'];
+const ALL_TABS = ['tab-notes', 'tab-attendance', 'tab-news', 'tab-studentfile', 'tab-reports'];
 
 function switchTab(activeTab, activeScreen, title){
   ALL_TABS.forEach(id => document.getElementById(id).classList.toggle('active', id === activeTab));
@@ -887,6 +991,15 @@ document.getElementById('tab-news').addEventListener('click', async ()=>{
 
 document.getElementById('tab-studentfile').addEventListener('click', ()=>{
   switchTab('tab-studentfile', 'screen-studentfile', 'ملف الطالب');
+});
+
+let reportsReady = false;
+document.getElementById('tab-reports').addEventListener('click', async ()=>{
+  switchTab('tab-reports', 'screen-reports', 'التقارير');
+  if(!reportsReady){
+    reportsReady = true;
+    await initReports();
+  }
 });
 
 
@@ -922,6 +1035,11 @@ async function doLogout(){
   allClasses = [];
   classRoster = [];
   document.getElementById('app-main').classList.remove('is-visible');
+  // admin-only affordances must not survive into the next person's session
+  document.getElementById('tab-attendance').style.display = 'none';
+  document.getElementById('tab-reports').style.display = 'none';
+  document.getElementById('media-upload-section').style.display = 'none';
+  switchTab('tab-notes', 'screen-notes', 'تسجيل ملاحظة');
   document.getElementById('screen-password').style.display = 'none';
   document.getElementById('login-step1').style.display = 'flex';
   document.getElementById('employee-number-input').value = '';
@@ -2052,6 +2170,429 @@ async function loadStudentTimeline(student){
       }
     }
   });
+}
+
+// =====================================================================
+// REPORTS — printable A4 sheets for the principal (admins only)
+// =====================================================================
+const MINISTRY_LINES = [
+  'سلطنة عُمان — وزارة التربية والتعليم',
+  'المديرية العامة للتربية والتعليم بمحافظة جنوب الشرقية'
+];
+const SCHOOL_LINE = 'مدرسة الرويس للبنين — رقم المدرسة 5224';
+
+const SEV = {
+  positive: { k: 'pos',      t: 'إيجابي' },
+  minor:    { k: 'minor',    t: 'بسيط'   },
+  moderate: { k: 'moderate', t: 'متوسط'  },
+  serious:  { k: 'serious',  t: 'جسيم'   }
+};
+function sevOf(cat){
+  if(!cat) return SEV.minor;
+  return cat.type === 'positive' ? SEV.positive : (SEV[cat.severity] || SEV.minor);
+}
+function escHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function repDate(s){
+  const d = new Date(s);
+  return d.toLocaleDateString('en-GB');   // 03/09/2026 — unambiguous on paper
+}
+
+let repUserNames = {};    // user id → full name, for the "recorded by" column
+let repStudents = [];     // roster of the selected class
+
+function repEls(){
+  return {
+    type: document.getElementById('rep-type'),
+    cls: document.getElementById('rep-class'),
+    stu: document.getElementById('rep-student'),
+    from: document.getElementById('rep-from'),
+    to: document.getElementById('rep-to')
+  };
+}
+
+function repSyncFields(){
+  const t = repEls().type.value;
+  document.getElementById('rep-class-field').style.display   = (t === 'student' || t === 'class') ? 'block' : 'none';
+  document.getElementById('rep-student-field').style.display = (t === 'student') ? 'block' : 'none';
+}
+
+async function initReports(){
+  // class list — allClasses is already loaded for the picker, reuse it
+  if(allClasses.length === 0){
+    const { data } = await supabase.from('classes').select('id, grade, section, label_ar').order('grade');
+    allClasses = data || [];
+  }
+  repEls().cls.innerHTML = '<option value="">— اختر صفاً —</option>' +
+    allClasses.map(c => `<option value="${c.id}">${escHtml(c.label_ar)}</option>`).join('');
+
+  // teacher names for the "recorded by" column; if RLS hides the table we
+  // simply print a dash instead of failing the whole report
+  const { data: us } = await supabase.from('users').select('id, full_name');
+  repUserNames = {};
+  (us || []).forEach(u => repUserNames[u.id] = u.full_name);
+
+  // default period: start of the current month → today
+  const now = new Date();
+  const first = new Date(now.getFullYear(), now.getMonth(), 1);
+  repEls().from.value = first.toISOString().slice(0, 10);
+  repEls().to.value = now.toISOString().slice(0, 10);
+  repSyncFields();
+}
+
+document.getElementById('rep-type').addEventListener('change', repSyncFields);
+
+document.getElementById('rep-class').addEventListener('change', async ()=>{
+  const cid = repEls().cls.value;
+  const sel = repEls().stu;
+  if(!cid){ sel.innerHTML = '<option value="">— اختر الصف أولاً —</option>'; return; }
+  sel.innerHTML = '<option value="">جارٍ التحميل…</option>';
+  const { data } = await supabase
+    .from('students')
+    .select('id, full_name, national_id')
+    .eq('class_id', cid)
+    .order('full_name');
+  repStudents = data || [];
+  sel.innerHTML = '<option value="">— اختر الطالب —</option>' +
+    repStudents.map(s => `<option value="${s.id}">${escHtml(s.full_name)}</option>`).join('');
+});
+
+document.getElementById('rep-print').addEventListener('click', ()=> window.print());
+
+document.getElementById('rep-build').addEventListener('click', async ()=>{
+  const e = repEls();
+  const errEl = document.getElementById('rep-error');
+  errEl.style.display = 'none';
+  const fail = m => { errEl.textContent = m; errEl.style.display = 'block'; };
+
+  const type = e.type.value, cid = e.cls.value, sid = e.stu.value;
+  if((type === 'student' || type === 'class') && !cid) return fail('اختر الصف');
+  if(type === 'student' && !sid) return fail('اختر الطالب');
+
+  const btn = document.getElementById('rep-build');
+  btn.disabled = true; btn.textContent = 'جارٍ الإنشاء…';
+  document.getElementById('rep-print-bar').style.display = 'none';
+
+  try{
+    const range = {};
+    if(e.from.value) range.from = e.from.value + 'T00:00:00';
+    if(e.to.value){
+      const d = new Date(e.to.value); d.setDate(d.getDate() + 1);   // "to" is inclusive
+      range.to = d.toISOString().slice(0, 10) + 'T00:00:00';
+    }
+
+    const html = await buildReport(type, cid, sid, range);
+    document.getElementById('report-sheet').innerHTML = html;
+    document.getElementById('rep-print-bar').style.display = 'block';
+    document.getElementById('report-sheet').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }catch(err){
+    fail('تعذر إنشاء التقرير — حاول مرة أخرى');
+  }finally{
+    btn.disabled = false; btn.textContent = 'إنشاء التقرير';
+  }
+});
+
+function applyRange(q, range){
+  if(range.from) q = q.gte('created_at', range.from);
+  if(range.to)   q = q.lt('created_at', range.to);
+  return q;
+}
+
+async function fetchIncidents(scope, range){
+  let q = supabase.from('incidents')
+    .select('id, created_at, note, recorded_by, students!inner(id, full_name, national_id, class_id, classes(label_ar)), behavior_categories(label_ar, type, severity)');
+  if(scope.studentId) q = q.eq('student_id', scope.studentId);
+  if(scope.classId)   q = q.eq('students.class_id', scope.classId);
+  const { data, error } = await applyRange(q, range).order('created_at', { ascending: true });
+  if(error) throw error;
+  return data || [];
+}
+
+async function fetchAttendance(scope, range){
+  let q = supabase.from('attendance_records')
+    .select('id, created_at, kind, note, recorded_by, students!inner(id, full_name, class_id, classes(label_ar))');
+  if(scope.studentId) q = q.eq('student_id', scope.studentId);
+  if(scope.classId)   q = q.eq('students.class_id', scope.classId);
+  const { data, error } = await applyRange(q, range).order('created_at', { ascending: true });
+  if(error) throw error;
+  return data || [];
+}
+
+function periodText(){
+  const e = repEls();
+  const f = e.from.value ? e.from.value.split('-').reverse().join('/') : 'بداية السجل';
+  const t = e.to.value ? e.to.value.split('-').reverse().join('/') : 'اليوم';
+  return `الفترة: من ${f} إلى ${t}`;
+}
+
+function sheetHead(title){
+  return `<div class="sheet-head">
+    <div class="ministry">${MINISTRY_LINES.map(escHtml).join('<br>')}</div>
+    <div class="school">${escHtml(SCHOOL_LINE)}</div>
+    <div class="rtitle">${escHtml(title)}</div>
+    <div class="period">${escHtml(periodText())}</div>
+  </div>`;
+}
+
+function sheetFoot(){
+  const now = new Date();
+  return `<div class="sign">
+      <div><div class="line">المعلم / الأخصائي</div></div>
+      <div><div class="line">مدير المدرسة</div></div>
+    </div>
+    <div class="sheet-foot">
+      <span>وثيقة مدرسية — للاستخدام الداخلي</span>
+      <span>تاريخ الطباعة: ${now.toLocaleDateString('en-GB')}</span>
+    </div>`;
+}
+
+function tally(incidents, attendance){
+  const t = { positive:0, minor:0, moderate:0, serious:0, late:0, absent:0 };
+  incidents.forEach(i => t[sevOf(i.behavior_categories).k === 'pos' ? 'positive' : i.behavior_categories.severity]++);
+  attendance.forEach(a => { if(a.kind === 'late') t.late++; else t.absent++; });
+  return t;
+}
+function sumChips(t){
+  const items = [
+    ['إيجابي', t.positive], ['بسيط', t.minor], ['متوسط', t.moderate],
+    ['جسيم', t.serious], ['غياب', t.absent], ['تأخر', t.late]
+  ];
+  return `<div class="sum-row">${items.map(([k, v]) =>
+    `<div class="sum-chip"><b>${v}</b>${escHtml(k)}</div>`).join('')}</div>`;
+}
+function noneRow(cols, msg){
+  return `<tr><td class="c" colspan="${cols}">${escHtml(msg)}</td></tr>`;
+}
+function who(id){ return repUserNames[id] || '—'; }
+
+async function buildReport(type, cid, sid, range){
+  if(type === 'student')  return buildStudentReport(cid, sid, range);
+  if(type === 'class')    return buildClassReport(cid, range);
+  if(type === 'school')   return buildSchoolReport(range);
+  return buildFollowupReport(range);
+}
+
+/* ---------- 1. one student's behavior record ---------- */
+async function buildStudentReport(cid, sid, range){
+  const [inc, att] = await Promise.all([
+    fetchIncidents({ studentId: sid }, range),
+    fetchAttendance({ studentId: sid }, range)
+  ]);
+  const s = repStudents.find(x => x.id === sid) || {};
+  const clsLabel = (allClasses.find(c => c.id === cid) || {}).label_ar || '';
+  const t = tally(inc, att);
+
+  const incRows = inc.length ? inc.map((i, n) => {
+    const sv = sevOf(i.behavior_categories);
+    return `<tr>
+      <td class="c">${n + 1}</td>
+      <td class="c">${repDate(i.created_at)}</td>
+      <td>${escHtml(i.behavior_categories ? i.behavior_categories.label_ar : '')}</td>
+      <td class="c"><span class="sev ${sv.k}">${sv.t}</span></td>
+      <td>${escHtml(i.note || '')}</td>
+      <td>${escHtml(who(i.recorded_by))}</td>
+    </tr>`;
+  }).join('') : noneRow(6, 'لا توجد ملاحظات في هذه الفترة');
+
+  const attRows = att.length ? att.map((a, n) => `<tr>
+      <td class="c">${n + 1}</td>
+      <td class="c">${repDate(a.created_at)}</td>
+      <td class="c">${a.kind === 'late' ? 'تأخر' : 'غياب'}</td>
+      <td>${escHtml(a.note || '')}</td>
+      <td>${escHtml(who(a.recorded_by))}</td>
+    </tr>`).join('') : noneRow(5, 'لا توجد سجلات غياب أو تأخر في هذه الفترة');
+
+  return `<div class="sheet">
+    ${sheetHead('سجل الطالب السلوكي')}
+    <div class="sheet-meta">
+      <span><b>الطالب:</b> ${escHtml(s.full_name || '')}</span>
+      <span><b>الصف:</b> ${escHtml(clsLabel)}</span>
+      <span><b>رقم الهوية:</b> ${escHtml(s.national_id || '')}</span>
+    </div>
+    <h3>الملخص</h3>
+    ${sumChips(t)}
+    <h3>الملاحظات السلوكية</h3>
+    <table class="rep"><thead><tr>
+      <th style="width:26px;">م</th><th style="width:64px;">التاريخ</th><th>التصنيف</th>
+      <th style="width:52px;">الدرجة</th><th>الملاحظة</th><th style="width:110px;">المُسجِّل</th>
+    </tr></thead><tbody>${incRows}</tbody></table>
+    <h3>الغياب والتأخر</h3>
+    <table class="rep"><thead><tr>
+      <th style="width:26px;">م</th><th style="width:64px;">التاريخ</th><th style="width:52px;">النوع</th>
+      <th>الملاحظة</th><th style="width:110px;">المُسجِّل</th>
+    </tr></thead><tbody>${attRows}</tbody></table>
+    ${sheetFoot()}
+  </div>`;
+}
+
+/* ---------- 2. one class ---------- */
+async function buildClassReport(cid, range){
+  const [inc, att] = await Promise.all([
+    fetchIncidents({ classId: cid }, range),
+    fetchAttendance({ classId: cid }, range)
+  ]);
+  const clsLabel = (allClasses.find(c => c.id === cid) || {}).label_ar || '';
+  const t = tally(inc, att);
+
+  // per-student summary
+  const per = {};
+  const bump = (st, k) => {
+    if(!st) return;
+    per[st.id] = per[st.id] || { name: st.full_name, positive:0, minor:0, moderate:0, serious:0, late:0, absent:0 };
+    per[st.id][k]++;
+  };
+  inc.forEach(i => bump(i.students, sevOf(i.behavior_categories).k === 'pos' ? 'positive' : i.behavior_categories.severity));
+  att.forEach(a => bump(a.students, a.kind === 'late' ? 'late' : 'absent'));
+
+  const list = Object.values(per).sort((a, b) =>
+    (b.serious * 3 + b.moderate * 2 + b.minor) - (a.serious * 3 + a.moderate * 2 + a.minor));
+
+  const sumRows = list.length ? list.map((r, n) => `<tr>
+      <td class="c">${n + 1}</td><td>${escHtml(r.name)}</td>
+      <td class="c">${r.positive}</td><td class="c">${r.minor}</td>
+      <td class="c">${r.moderate}</td><td class="c">${r.serious}</td>
+      <td class="c">${r.absent}</td><td class="c">${r.late}</td>
+    </tr>`).join('') : noneRow(8, 'لا توجد سجلات في هذه الفترة');
+
+  const detail = inc.length ? inc.map((i, n) => {
+    const sv = sevOf(i.behavior_categories);
+    return `<tr>
+      <td class="c">${n + 1}</td>
+      <td class="c">${repDate(i.created_at)}</td>
+      <td>${escHtml(i.students ? i.students.full_name : '')}</td>
+      <td>${escHtml(i.behavior_categories ? i.behavior_categories.label_ar : '')}</td>
+      <td class="c"><span class="sev ${sv.k}">${sv.t}</span></td>
+      <td>${escHtml(i.note || '')}</td>
+      <td>${escHtml(who(i.recorded_by))}</td>
+    </tr>`;
+  }).join('') : noneRow(7, 'لا توجد ملاحظات في هذه الفترة');
+
+  return `<div class="sheet">
+    ${sheetHead('تقرير صف — ' + clsLabel)}
+    <h3>الملخص العام</h3>
+    ${sumChips(t)}
+    <h3>حسب الطالب</h3>
+    <table class="rep"><thead><tr>
+      <th style="width:26px;">م</th><th>الطالب</th><th style="width:44px;">إيجابي</th>
+      <th style="width:38px;">بسيط</th><th style="width:44px;">متوسط</th><th style="width:38px;">جسيم</th>
+      <th style="width:38px;">غياب</th><th style="width:38px;">تأخر</th>
+    </tr></thead><tbody>${sumRows}</tbody></table>
+    <h3>تفصيل الملاحظات</h3>
+    <table class="rep"><thead><tr>
+      <th style="width:26px;">م</th><th style="width:64px;">التاريخ</th><th>الطالب</th>
+      <th>التصنيف</th><th style="width:52px;">الدرجة</th><th>الملاحظة</th><th style="width:96px;">المُسجِّل</th>
+    </tr></thead><tbody>${detail}</tbody></table>
+    ${sheetFoot()}
+  </div>`;
+}
+
+/* ---------- 3. whole school ---------- */
+async function buildSchoolReport(range){
+  const [inc, att, studentsRes] = await Promise.all([
+    fetchIncidents({}, range),
+    fetchAttendance({}, range),
+    supabase.from('students').select('id, class_id')
+  ]);
+  const students = studentsRes.data || [];
+
+  const rows = allClasses.map(c=>{
+    const ci = inc.filter(i => i.students && i.students.class_id === c.id);
+    const ca = att.filter(a => a.students && a.students.class_id === c.id);
+    const t = tally(ci, ca);
+    return {
+      label: c.label_ar,
+      count: students.filter(s => s.class_id === c.id).length,
+      t, total: ci.length
+    };
+  });
+
+  const tot = rows.reduce((acc, r)=>{
+    ['positive','minor','moderate','serious','late','absent'].forEach(k => acc.t[k] += r.t[k]);
+    acc.count += r.count; acc.total += r.total;
+    return acc;
+  }, { count:0, total:0, t:{ positive:0, minor:0, moderate:0, serious:0, late:0, absent:0 } });
+
+  const body = rows.map((r, n) => `<tr>
+      <td class="c">${n + 1}</td><td>${escHtml(r.label)}</td><td class="c">${r.count}</td>
+      <td class="c">${r.t.positive}</td><td class="c">${r.t.minor}</td>
+      <td class="c">${r.t.moderate}</td><td class="c">${r.t.serious}</td>
+      <td class="c">${r.total}</td><td class="c">${r.t.absent}</td><td class="c">${r.t.late}</td>
+    </tr>`).join('');
+
+  return `<div class="sheet">
+    ${sheetHead('ملخص المدرسة')}
+    <h3>الإجمالي</h3>
+    ${sumChips(tot.t)}
+    <h3>حسب الصف</h3>
+    <table class="rep"><thead><tr>
+      <th style="width:26px;">م</th><th>الصف</th><th style="width:44px;">الطلاب</th>
+      <th style="width:44px;">إيجابي</th><th style="width:38px;">بسيط</th><th style="width:44px;">متوسط</th>
+      <th style="width:38px;">جسيم</th><th style="width:52px;">الإجمالي</th>
+      <th style="width:38px;">غياب</th><th style="width:38px;">تأخر</th>
+    </tr></thead><tbody>
+      ${body}
+      <tr class="total">
+        <td class="c">—</td><td>الإجمالي</td><td class="c">${tot.count}</td>
+        <td class="c">${tot.t.positive}</td><td class="c">${tot.t.minor}</td>
+        <td class="c">${tot.t.moderate}</td><td class="c">${tot.t.serious}</td>
+        <td class="c">${tot.total}</td><td class="c">${tot.t.absent}</td><td class="c">${tot.t.late}</td>
+      </tr>
+    </tbody></table>
+    ${sheetFoot()}
+  </div>`;
+}
+
+/* ---------- 4. follow-up list ---------- */
+async function buildFollowupReport(range){
+  const [inc, att] = await Promise.all([
+    fetchIncidents({}, range),
+    fetchAttendance({}, range)
+  ]);
+
+  const per = {};
+  const seed = st => {
+    if(!st) return null;
+    per[st.id] = per[st.id] || {
+      name: st.full_name,
+      cls: st.classes ? st.classes.label_ar : '',
+      positive:0, minor:0, moderate:0, serious:0, late:0, absent:0
+    };
+    return per[st.id];
+  };
+  inc.forEach(i=>{
+    const r = seed(i.students);
+    if(r) r[sevOf(i.behavior_categories).k === 'pos' ? 'positive' : i.behavior_categories.severity]++;
+  });
+  att.forEach(a=>{
+    const r = seed(a.students);
+    if(r) r[a.kind === 'late' ? 'late' : 'absent']++;
+  });
+
+  // weight by how much attention the case needs; positives don't count against
+  const list = Object.values(per)
+    .map(r => Object.assign(r, { score: r.serious * 3 + r.moderate * 2 + r.minor + r.absent }))
+    .filter(r => r.score > 0)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, 30);
+
+  const body = list.length ? list.map((r, n) => `<tr>
+      <td class="c">${n + 1}</td><td>${escHtml(r.name)}</td><td class="c">${escHtml(r.cls)}</td>
+      <td class="c">${r.serious}</td><td class="c">${r.moderate}</td><td class="c">${r.minor}</td>
+      <td class="c">${r.absent}</td><td class="c">${r.late}</td>
+      <td class="c">${r.positive}</td>
+    </tr>`).join('') : noneRow(9, 'لا توجد حالات تستدعي المتابعة في هذه الفترة');
+
+  return `<div class="sheet">
+    ${sheetHead('قائمة المتابعة — الحالات الأولى بالاهتمام')}
+    <div class="sheet-meta"><span>مرتبة حسب شدة الحالات وتكرارها — أعلى ٣٠ حالة</span></div>
+    <table class="rep"><thead><tr>
+      <th style="width:26px;">م</th><th>الطالب</th><th style="width:70px;">الصف</th>
+      <th style="width:38px;">جسيم</th><th style="width:44px;">متوسط</th><th style="width:38px;">بسيط</th>
+      <th style="width:38px;">غياب</th><th style="width:38px;">تأخر</th><th style="width:44px;">إيجابي</th>
+    </tr></thead><tbody>${body}</tbody></table>
+    ${sheetFoot()}
+  </div>`;
 }
 
 // ---------- on load: resume session if already logged in ----------
