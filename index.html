@@ -476,11 +476,13 @@
                 <span id="audio-btn-label">صوت</span>
               </div>
             </div>
-            <p class="attach-hint">سيتم حفظ المرفقات مع السجل. لإرسالها ضمن رسالة واتساب، أرفقها يدويًا بعد الضغط على "إرسال".</p>
+            <p class="attach-hint">يمكنك التقاط صورة/فيديو أو اختيار ملفات محفوظة من المعرض (ويمكن اختيار أكثر من ملف). الحد الأقصى ٢٥ ميجابايت للملف. سيتم حفظ المرفقات مع السجل — ولإرسالها ضمن رسالة واتساب أرفقها يدويًا بعد الضغط على "إرسال".</p>
             <div class="media-list" id="media-list"></div>
           </div>
-          <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none;">
-          <input type="file" id="video-input" accept="video/*" capture="environment" style="display:none;">
+          <!-- no capture="…" here: it forces the camera and hides the gallery on
+               phones. Without it the OS picker offers both الكاميرا and المعرض. -->
+          <input type="file" id="photo-input" accept="image/*" multiple style="display:none;">
+          <input type="file" id="video-input" accept="video/*" multiple style="display:none;">
         </div>
 
         <div class="card">
@@ -1378,19 +1380,43 @@ document.getElementById('attach-video-btn').addEventListener('click', ()=>{
   document.getElementById('video-input').click();
 });
 
+// storage keys must stay ASCII-safe: Arabic filenames and spaces coming out of
+// the gallery would otherwise produce an unusable object path
+function safeFileName(name, fallbackExt){
+  const dot = name.lastIndexOf('.');
+  const ext = dot > 0 ? name.slice(dot + 1).toLowerCase().replace(/[^a-z0-9]/g, '') : '';
+  return `file.${ext || fallbackExt}`;
+}
+
+const MAX_ATTACHMENT_MB = 25;
+
+// shared by both pickers — accepts a whole FileList so the teacher can pick
+// several photos from the gallery in one go
+function addPickedFiles(fileList, kind, fallbackExt){
+  let added = 0;
+  for(const file of fileList){
+    if(file.size > MAX_ATTACHMENT_MB * 1024 * 1024){
+      showToast(`الملف كبير جدًا (الحد ${MAX_ATTACHMENT_MB} ميجابايت): ${file.name}`);
+      continue;
+    }
+    pendingMedia.push({
+      kind,
+      blob: file,
+      name: file.name,
+      storeName: safeFileName(file.name, fallbackExt)
+    });
+    added++;
+  }
+  if(added > 0) renderMediaList();
+}
+
 document.getElementById('photo-input').addEventListener('change', (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  pendingMedia.push({ kind: 'image', blob: file, name: file.name });
-  renderMediaList();
+  addPickedFiles(e.target.files, 'image', 'jpg');
   e.target.value = '';
 });
 
 document.getElementById('video-input').addEventListener('change', (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-  pendingMedia.push({ kind: 'video', blob: file, name: file.name });
-  renderMediaList();
+  addPickedFiles(e.target.files, 'video', 'mp4');
   e.target.value = '';
 });
 
@@ -1416,7 +1442,7 @@ document.getElementById('attach-audio-btn').addEventListener('click', async ()=>
     mediaRecorder.onstop = ()=>{
       const blob = new Blob(recordedChunks, { type: 'audio/webm' });
       const name = `تسجيل-صوتي-${Date.now()}.webm`;
-      pendingMedia.push({ kind: 'audio', blob, name });
+      pendingMedia.push({ kind: 'audio', blob, name, storeName: 'voice.webm' });
       renderMediaList();
       stream.getTracks().forEach(t => t.stop());
       btn.classList.remove('recording');
@@ -1433,10 +1459,13 @@ document.getElementById('attach-audio-btn').addEventListener('click', async ()=>
 async function uploadPendingMedia(incidentId){
   for(const m of pendingMedia){
     try{
-      const path = `${incidentId}/${Date.now()}-${m.name}`;
+      // random suffix: several gallery files added in the same millisecond
+      // would otherwise collide on the same object key
+      const rand = Math.random().toString(36).slice(2, 7);
+      const path = `${incidentId}/${Date.now()}-${rand}-${m.storeName || m.name}`;
       const { error: uploadErr } = await supabase.storage
         .from('incident-media')
-        .upload(path, m.blob);
+        .upload(path, m.blob, { contentType: m.blob.type || undefined, upsert: false });
 
       if(uploadErr){
         showToast(`تعذر رفع مرفق: ${m.name}`);
