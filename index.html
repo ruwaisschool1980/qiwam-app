@@ -119,6 +119,10 @@
   .cat-group:last-child{margin-bottom:0;}
   .cat-group-title{font-size:11px;font-weight:700;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
   .cat-group-title .dot{width:7px;height:7px;border-radius:50%;}
+  .cat-field{margin-bottom:12px;}
+  .cat-field:last-child{margin-bottom:0;}
+  .cat-field .picker-trigger.filled{border-color:var(--copper);box-shadow:inset 0 0 0 1px var(--copper);background:var(--card);}
+  .cat-count{margin-inline-start:auto;font-size:10px;font-weight:600;color:var(--ink-soft);background:var(--sand);border:1px solid var(--line);border-radius:999px;padding:1px 7px;}
   .cat-group-title.pos{color:var(--pos);} .cat-group-title.pos .dot{background:var(--pos);}
   .cat-group-title.minor{color:var(--minor);} .cat-group-title.minor .dot{background:var(--minor);}
   .cat-group-title.moderate{color:var(--moderate);} .cat-group-title.moderate .dot{background:var(--moderate);}
@@ -728,6 +732,8 @@ let pendingEmployeeNumber = null;
 let currentAppUser = null;   // row from public.users
 let categories = [];
 let selectedCategory = null;
+let catPickers = []; // one dropdown per severity group: {def, trigger, panel}
+const CHEVRON_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>';
 let selectedStudent = null;  // {id, full_name, phone, class_label}
 
 function showToast(msg){
@@ -1211,41 +1217,75 @@ async function loadCategories(){
   categories = data;
   const container = document.getElementById('cat-groups');
   container.innerHTML = '';
+  catPickers = [];
 
   const groupDefs = [
-    { key: 'positive', title: 'إيجابي', tagClass: 'pos', match: c => c.type === 'positive' },
-    { key: 'minor',    title: 'بسيط',   tagClass: 'minor',    match: c => c.severity === 'minor' },
-    { key: 'moderate', title: 'متوسط',  tagClass: 'moderate', match: c => c.severity === 'moderate' },
-    { key: 'serious',  title: 'جسيم',   tagClass: 'serious',  match: c => c.severity === 'serious' },
+    { key: 'positive', title: 'إيجابي', placeholder: 'اختر ملاحظة إيجابية',  tagClass: 'pos',      match: c => c.type === 'positive' },
+    { key: 'minor',    title: 'بسيط',   placeholder: 'اختر مخالفة بسيطة',    tagClass: 'minor',    match: c => c.type !== 'positive' && c.severity === 'minor' },
+    { key: 'moderate', title: 'متوسط',  placeholder: 'اختر مخالفة متوسطة',   tagClass: 'moderate', match: c => c.type !== 'positive' && c.severity === 'moderate' },
+    { key: 'serious',  title: 'جسيم',   placeholder: 'اختر مخالفة جسيمة',    tagClass: 'serious',  match: c => c.type !== 'positive' && c.severity === 'serious' },
   ];
 
   groupDefs.forEach(g=>{
-    const items = categories.filter(g.match);
+    const items = categories.filter(g.match)
+                            .sort((a,b)=> a.label_ar.localeCompare(b.label_ar, 'ar'));
     if(items.length === 0) return;
 
-    const groupEl = document.createElement('div');
-    groupEl.className = 'cat-group';
-    groupEl.innerHTML = `<div class="cat-group-title ${g.tagClass}"><span class="dot"></span>${g.title}</div>`;
+    // one collapsed dropdown per severity, so a long list of 12 مخالفات جسيمة
+    // never pushes the rest of the form off the screen
+    const field = document.createElement('div');
+    field.className = 'field cat-field';
+    field.innerHTML = `
+      <div class="cat-group-title ${g.tagClass}"><span class="dot"></span>${g.title}
+        <span class="cat-count">${items.length}</span>
+      </div>
+      <div class="picker-trigger">
+        <span>${g.placeholder}</span>
+        ${CHEVRON_SVG}
+      </div>
+      <div class="picker-panel"><div class="picker-list"></div></div>`;
 
-    const grid = document.createElement('div');
-    grid.className = 'cat-grid';
+    const trg   = field.querySelector('.picker-trigger');
+    const panel = field.querySelector('.picker-panel');
+    const list  = field.querySelector('.picker-list');
+
+    catPickers.push({ def: g, trigger: trg, panel: panel });
+
+    trg.addEventListener('click', ()=>{
+      const willOpen = !panel.classList.contains('open');
+      catPickers.forEach(p => p.panel.classList.remove('open'));
+      if(willOpen) panel.classList.add('open');
+    });
 
     items.forEach(c=>{
-      const btn = document.createElement('div');
-      btn.className = 'cat-btn';
-      btn.innerHTML = `<span class="label">${c.label_ar}</span>`;
-      btn.addEventListener('click', ()=>{
-        document.querySelectorAll('.cat-btn').forEach(x=>x.classList.remove('selected'));
-        btn.classList.add('selected');
+      const row = document.createElement('div');
+      row.className = 'picker-row';
+      row.innerHTML = `<div class="pname">${c.label_ar}</div>`;
+      row.addEventListener('click', ()=>{
         selectedCategory = c;
+        // a category lives in exactly one group — clear the other three so the
+        // form can never show two selections at once
+        clearCategoryTriggers();
+        trg.innerHTML = `<span class="chosen">${c.label_ar}</span>${CHEVRON_SVG}`;
+        trg.classList.add('filled');
+        panel.classList.remove('open');
         updateSendButtonState();
         updateMessagePreview();
       });
-      grid.appendChild(btn);
+      list.appendChild(row);
     });
 
-    groupEl.appendChild(grid);
-    container.appendChild(groupEl);
+    container.appendChild(field);
+  });
+}
+
+// resets every severity dropdown back to its placeholder (used on a new
+// selection and by resetForm after a save)
+function clearCategoryTriggers(){
+  catPickers.forEach(p=>{
+    p.trigger.innerHTML = `<span>${p.def.placeholder}</span>${CHEVRON_SVG}`;
+    p.trigger.classList.remove('filled');
+    p.panel.classList.remove('open');
   });
 }
 
@@ -1571,7 +1611,7 @@ function resetForm(){
   pendingMedia = [];
   renderMediaList();
   document.getElementById('note-input').value = '';
-  document.querySelectorAll('.cat-btn').forEach(x=>x.classList.remove('selected'));
+  clearCategoryTriggers();
   trigger.innerHTML = `<span>اختر طالبًا من القائمة</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>`;
   trigger.classList.remove('filled');
   updateSendButtonState();
